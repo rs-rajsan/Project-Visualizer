@@ -65,16 +65,42 @@ export class LayoutAlgorithm {
 
                 // SPECIAL RULE: Intra-milestone dependencies use the LEFT side to connect
                 // This applies to logical edges (e-logic-*) between tasks/milestones in the same group.
-                const sameContext = sourceNode.data.milestone === targetNode.data.milestone &&
+                const sameMilestone = sourceNode.data.milestone === targetNode.data.milestone &&
                     sourceNode.data.phase === targetNode.data.phase;
+                const samePhase = sourceNode.data.phase === targetNode.data.phase;
 
-                if (sameContext) {
+                // Define semantic colors based on User Suggestions
+                const COLORS = {
+                    INTRA_GROUP: '#22d3ee', // Cyan 400 (Tasks within same Milestone)
+                    INTER_GROUP: '#fbbf24', // Yellow 400 (Crosses Milestone or Phase)
+                };
+
+                // Use vibrancy and distinct line styles
+                let edgeColor = COLORS.INTER_GROUP;
+                let strokeDasharray = sameMilestone ? '0 0' : '5 5'; // Solid for Intra, Dashed for Inter-group transitions
+
+                // Get color from Source Node Theme (Source-Based Coloring)
+                const getSourceColor = (node) => {
+                    if (node.data.nodeType === 'task') return '#22d3ee'; // Cyan 400
+                    if (node.data.nodeType === 'phase') return '#818cf8'; // Indigo 400
+                    if (node.data.nodeType === 'milestone') return '#fb923c'; // Orange 400
+                    return '#94a3b8';
+                };
+
+                // Final color decision: User preferred Cyan/Yellow, 
+                // but let's blend with Source-Based Coloring:
+                // If it's inter-group, the Yellow stands out. If it's intra-group, it follows the source theme (Cyan).
+                const sourceColor = getSourceColor(sourceNode);
+                edgeColor = sameMilestone ? sourceColor : COLORS.INTER_GROUP;
+
+                if (sameMilestone) {
                     return {
                         ...edge,
                         sourceHandle: 'left-source',
                         targetHandle: 'left-target',
                         type: 'smoothstep', // Create a curved loop on the left
-                        style: { ...edge.style, strokeWidth: 2 }
+                        style: { ...edge.style, stroke: edgeColor, strokeWidth: 2, strokeDasharray },
+                        markerEnd: { ...edge.markerEnd, color: edgeColor }
                     };
                 }
 
@@ -109,7 +135,9 @@ export class LayoutAlgorithm {
                 return {
                     ...edge,
                     sourceHandle: bestSource,
-                    targetHandle: bestTarget
+                    targetHandle: bestTarget,
+                    style: { ...edge.style, stroke: edgeColor, strokeWidth: 2, strokeDasharray },
+                    markerEnd: { ...edge.markerEnd, color: edgeColor }
                 };
             });
 

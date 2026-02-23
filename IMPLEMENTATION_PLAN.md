@@ -128,22 +128,29 @@ The goal of the implementation plan is to outline tasks, estimated duration, com
  
  ---
  
- ## **Phase 7: Timeline & Gantt Visualization** (Est. 6-8 Hours)
+ ## **Phase 7: Timeline & Gantt Visualization** (Completed)
  
  ### 7.1 Gantt Component �
- - [ ] Create `GanttChart.jsx` (SVG-based implementation).
- - [ ] Implement robust date parsing (`Start` + `Duration` or `Start` + `End`).
- - [ ] Auto-calculate project duration and scale.
+ - [x] Create `GanttChart.jsx` (SVG-based implementation).
+ - [x] Implement robust date parsing (`Start` + `Duration` or `Start` + `End`).
+ - [x] Auto-calculate project duration and scale.
  
  ### 7.2 Interactive Hierarchy �
- - [ ] Implement `expanded` state for Phases and Milestones.
- - [ ] Default state: **Phases Collapsed**.
- - [ ] Hierarchical Indentation (Phase -> Milestone -> Task).
+ - [x] Implement `expanded` state for Phases and Milestones.
+ - [x] Default state: **Phases Collapsed**.
+ - [x] Hierarchical Indentation (Phase -> Milestone -> Task).
  
  ### 7.3 Advanced UI Features �
- - [ ] **2D Scrolling**: Sticky Headers (Date Scale) and Sticky Columns (Task Names).
- - [ ] **Weekend Highlighting**: Vertical shading for Sat/Sun.
- - [ ] **Theme Integration**: Dark/Light mode support.
+ - [x] **2D Scrolling**: Sticky Headers (Date Scale) and Sticky Columns (Task Names).
+ - [x] **Weekend Highlighting**: Vertical shading for Sat/Sun.
+ - [x] **Theme Integration**: Dark/Light mode support.
+
+ ### 7.4 Advanced Dependency Differentiation (Future Ideas) 🔴
+ - [x] **Semantic Color Encoding**: Assign colors based on relationship types (Intra-Milestone, Inter-Milestone, Inter-Phase) with synced arrow markers.
+ - [ ] **Physical Routing Refinements**: Implement Edge Bundling for high-density paths and Incremental Offsets for left-side "bus" elbow distances.
+ - [ ] **Interactive "Focus" States**: Apply Opacity Gradients for long-distance edges and Shadow Glows for active task dependency chains (Neon highlighting).
+ - [ ] **Advanced Line Markers**: Differentiate "Standard Dependency" vs "Critical Milestone Blocker" using endpoint variance (Arrows vs Solid Dots).
+ - [ ] **"Lens" or "Zone" Dimming**: Implement Distance-based adaptive visibility to hide logic lines at high zoom levels (LOD control).
  
  ---
  
