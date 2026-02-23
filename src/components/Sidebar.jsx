@@ -1,8 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List } from 'lucide-react';
 import { logger } from '../utils/logger';
 
-const Sidebar = ({ onFileUpload }) => {
+const Sidebar = ({ onFileUpload, viewMode, setViewMode }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -110,6 +110,28 @@ const Sidebar = ({ onFileUpload }) => {
                     <p className="text-xs text-slate-400">
                         CSV, XLSX, or XLS
                     </p>
+                </div>
+
+                <div className="mt-8">
+                    <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
+                        View Mode
+                    </h2>
+                    <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <button
+                            onClick={() => setViewMode('network')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'network' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        >
+                            <Network className="w-4 h-4" />
+                            Graph
+                        </button>
+                        <button
+                            onClick={() => setViewMode('gantt')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'gantt' ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        >
+                            <List className="w-4 h-4" />
+                            Gantt
+                        </button>
+                    </div>
                 </div>
 
                 <div className="mt-8">

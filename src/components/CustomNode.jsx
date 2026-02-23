@@ -30,12 +30,15 @@ const CustomNode = ({ data, selected }) => {
     if (isTiny) {
         // Minimalist Lod map
         return (
-            <div className={clsx("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all", getThemeClasses(), selected && 'ring-2 ring-teal-400 scale-125')}>
+            <div className={clsx("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer", getThemeClasses(), (selected || data.isHighlighted) && 'ring-2 ring-teal-400 scale-125')}>
                 <Handle type="target" position={Position.Top} id="top-target" className="opacity-0" />
+                <Handle type="target" position={Position.Bottom} id="bottom-target" className="opacity-0" />
                 <Handle type="target" position={Position.Left} id="left-target" className="opacity-0" />
                 <Handle type="target" position={Position.Right} id="right-target" className="opacity-0" />
                 <span className="text-[8px] font-bold">{data.id}</span>
+                <Handle type="source" position={Position.Top} id="top-source" className="opacity-0" />
                 <Handle type="source" position={Position.Bottom} id="bottom-source" className="opacity-0" />
+                <Handle type="source" position={Position.Left} id="left-source" className="opacity-0" />
                 <Handle type="source" position={Position.Right} id="right-source" className="opacity-0" />
             </div>
         );
@@ -44,14 +47,14 @@ const CustomNode = ({ data, selected }) => {
     return (
         <div
             className={clsx(
-                "relative w-[105px] h-[55px] overflow-hidden border-2 rounded-xl transition-all duration-300",
+                "relative w-[105px] h-[55px] overflow-hidden border-2 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-lg",
                 getThemeClasses(),
-                data.nodeType !== 'task' ? 'cursor-pointer hover:shadow-lg' : 'cursor-default',
-                selected ? 'ring-2 ring-teal-400 border-teal-500 scale-105' : 'hover:scale-[1.02]'
+                selected || data.isHighlighted ? 'ring-2 ring-teal-400 border-teal-500 scale-105' : 'hover:scale-[1.02]'
             )}
         >
             {/* Target Handles */}
             <Handle type="target" position={Position.Top} id="top-target" className="w-2 h-2 border-2 left-1/2 -mt-[1px]" style={{ background: '#fff' }} />
+            <Handle type="target" position={Position.Bottom} id="bottom-target" className="opacity-0 bottom-0 left-1/2" />
             <Handle type="target" position={Position.Left} id="left-target" className="w-2 h-2 border-2 top-1/2 -ml-[1px]" style={{ background: '#fff' }} />
             <Handle type="target" position={Position.Right} id="right-target" className="opacity-0 top-1/2 right-0" />
 
@@ -118,7 +121,9 @@ const CustomNode = ({ data, selected }) => {
             </div>
 
             {/* Source Handles */}
+            <Handle type="source" position={Position.Top} id="top-source" className="opacity-0 top-0 left-1/2" />
             <Handle type="source" position={Position.Bottom} id="bottom-source" className="w-2 h-2 border-2 left-1/2 -mb-[1px]" style={{ background: '#fff' }} />
+            <Handle type="source" position={Position.Left} id="left-source" className="opacity-0 top-1/2 left-0" />
             <Handle type="source" position={Position.Right} id="right-source" className="w-2 h-2 border-2 top-1/2 -mr-[1px]" style={{ background: '#fff' }} />
         </div>
     );

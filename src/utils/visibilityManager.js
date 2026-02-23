@@ -87,7 +87,7 @@ export class VisibilityManager {
                                 id: milestone.id,
                                 name: milestone.name,
                                 label: milestone.name,
-                                milestone: 'Milestone',
+                                milestone: milestone.name,
                                 phase: phase.name,
                                 isExpanded: isMilestoneExpanded,
                                 nodeType: 'milestone',
