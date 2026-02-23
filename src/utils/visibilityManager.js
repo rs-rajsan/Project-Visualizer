@@ -142,8 +142,8 @@ export class VisibilityManager {
             });
 
             // Logical Dependencies between active nodes
-            // Find all visible tasks
             const visibleTaskIds = new Set(nodes.filter(n => n.data.nodeType === 'task').map(n => n.id));
+            const milestoneSummaryLinks = new Set();
 
             rawData.forEach(task => {
                 if (!visibleTaskIds.has(String(task.id))) return;
@@ -153,17 +153,52 @@ export class VisibilityManager {
                     const deps = String(depsRaw).split(',').map(d => d.trim()).filter(Boolean);
                     deps.forEach(sourceId => {
                         if (visibleTaskIds.has(sourceId)) {
+                            const sourceTask = rawData.find(t => String(t.id) === sourceId);
+                            const isCrossMilestone = sourceTask && sourceTask.milestone !== task.milestone;
+
+                            const importance = task.cost ? Math.min(5, Math.max(1, parseInt(task.cost, 10) / 10)) : 1;
+
                             edges.push({
                                 id: `e-logic-${sourceId}-${task.id}`,
                                 source: sourceId,
                                 target: String(task.id),
                                 sourceHandle: 'right-source',
                                 targetHandle: 'right-target',
-                                type: 'smoothstep',
-                                animated: true,
+                                type: 'smart', // Use custom SmartEdge
+                                animated: false,
+                                data: {
+                                    isMilestoneBlocker: isCrossMilestone,
+                                    importance,
+                                    isSummary: false
+                                },
                                 style: { stroke: '#94a3b8', strokeWidth: 2 },
-                                markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' }
+                                markerEnd: {
+                                    type: isCrossMilestone ? MarkerType.Arrow : MarkerType.ArrowClosed,
+                                    color: '#94a3b8'
+                                }
                             });
+
+                            // Summary Links logic
+                            if (isCrossMilestone && sourceTask.milestone && task.milestone) {
+                                const sMId = `milestone-${sourceTask.phase || 'Unphased'}-${sourceTask.milestone}`;
+                                const tMId = `milestone-${task.phase || 'Unphased'}-${task.milestone}`;
+                                const sKey = `${sMId}->${tMId}`;
+
+                                if (!milestoneSummaryLinks.has(sKey)) {
+                                    milestoneSummaryLinks.add(sKey);
+                                    edges.push({
+                                        id: `e-summary-${sKey}`,
+                                        source: sMId,
+                                        target: tMId,
+                                        sourceHandle: 'right-source',
+                                        targetHandle: 'left-target',
+                                        type: 'smart',
+                                        data: { isSummary: true },
+                                        style: { stroke: '#fbbf24', strokeWidth: 4 },
+                                        markerEnd: { type: MarkerType.ArrowClosed, color: '#fbbf24' }
+                                    });
+                                }
+                            }
                         }
                     });
                 }
@@ -177,5 +212,39 @@ export class VisibilityManager {
         } finally {
             logger.endTrace();
         }
+    }
+
+    /**
+     * Calculates the active path (precursors and successors) for a given taskId.
+     * Uses BFS traversal through logic edges.
+     */
+    static calculateTrace(nodes, edges, activeTaskId) {
+        const activeNodes = new Set([activeTaskId]);
+        const activeEdges = new Set();
+
+        let added = true;
+        while (added) {
+            added = false;
+            edges.forEach(edge => {
+                if (edge.id.startsWith('e-logic-')) {
+                    if (activeNodes.has(edge.source) && !activeNodes.has(edge.target)) {
+                        activeNodes.add(edge.target);
+                        activeEdges.add(edge.id);
+                        added = true;
+                    } else if (activeNodes.has(edge.target) && !activeNodes.has(edge.source)) {
+                        activeNodes.add(edge.source);
+                        activeEdges.add(edge.id);
+                        added = true;
+                    } else if (activeNodes.has(edge.source) && activeNodes.has(edge.target)) {
+                        if (!activeEdges.has(edge.id)) {
+                            activeEdges.add(edge.id);
+                            added = true;
+                        }
+                    }
+                }
+            });
+        }
+
+        return { activeNodes, activeEdges };
     }
 }

@@ -50,6 +50,10 @@ export class LayoutAlgorithm {
                 currentPhaseY = maxTaskYForPhase + phaseSpacingY;
             });
 
+            // 3. Physical Routing Refinements: Tracking for Bundling and Offsets
+            const intraMilestoneCounts = {}; // Track how many left-side connections per group
+            const milestonePairEdges = {};   // Track edges between same milestone pairs
+
             // Dynamically route edges to use the shortest straight-line distance handles
             const layoutedEdges = edges.map(edge => {
                 // We only dynamically route the logical dependency connections, leave rigid structural edges alone.
@@ -94,14 +98,34 @@ export class LayoutAlgorithm {
                 edgeColor = sameMilestone ? sourceColor : COLORS.INTER_GROUP;
 
                 if (sameMilestone) {
+                    const ctxKey = `${sourceNode.data.phase}-${sourceNode.data.milestone}`;
+                    const edgeIndex = intraMilestoneCounts[ctxKey] || 0;
+                    intraMilestoneCounts[ctxKey] = edgeIndex + 1;
+                    const busOffset = 10 + (edgeIndex * 5); // 10px, 15px, 20px...
+
+                    const distance = Math.abs(targetNode.position.y - sourceNode.position.y) + busOffset;
+
                     return {
                         ...edge,
                         sourceHandle: 'left-source',
                         targetHandle: 'left-target',
-                        type: 'smoothstep', // Create a curved loop on the left
+                        type: 'smart', // Custom routing for offsets/bundling
+                        // Pass the custom offset to the edge data for potential custom edge usage
+                        // or use it in the path calculation if we were fully custom.
+                        // For now, we'll use it to slightly vary the strokeWidth or add to data.
+                        data: { ...edge.data, busOffset, routingType: 'intra', distance },
                         style: { ...edge.style, stroke: edgeColor, strokeWidth: 2, strokeDasharray },
                         markerEnd: { ...edge.markerEnd, color: edgeColor }
                     };
+                }
+
+                // Prepare for Edge Bundling logic
+                const sourceM = sourceNode.data.milestone ? `m-${sourceNode.data.phase}-${sourceNode.data.milestone}` : sourceNode.id;
+                const targetM = targetNode.data.milestone ? `m-${targetNode.data.phase}-${targetNode.data.milestone}` : targetNode.id;
+                if (sourceM !== targetM) {
+                    const bundleKey = `${sourceM}->${targetM}`;
+                    milestonePairEdges[bundleKey] = (milestonePairEdges[bundleKey] || 0) + 1;
+                    edge.data = { ...edge.data, bundleIndex: milestonePairEdges[bundleKey], bundleKey };
                 }
 
                 // Node dimensions are approx 105 width by 55 height. 
@@ -132,11 +156,17 @@ export class LayoutAlgorithm {
                     }
                 }
 
+                // Final Styling: Use importance for line weight
+                const baseWidth = edge.data?.importance ? (1.5 + edge.data.importance * 0.5) : 2;
+                const finalStrokeWidth = sameMilestone ? 2 : baseWidth; // Keep intra-milestone consistent
+
                 return {
                     ...edge,
+                    type: 'smart',
                     sourceHandle: bestSource,
                     targetHandle: bestTarget,
-                    style: { ...edge.style, stroke: edgeColor, strokeWidth: 2, strokeDasharray },
+                    data: { ...edge.data, distance: minDistance },
+                    style: { ...edge.style, stroke: edgeColor, strokeWidth: finalStrokeWidth, strokeDasharray },
                     markerEnd: { ...edge.markerEnd, color: edgeColor }
                 };
             });

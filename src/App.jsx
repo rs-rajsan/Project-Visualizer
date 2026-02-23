@@ -10,6 +10,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css'; // Essential ReactFlow styles
 import Sidebar from './components/Sidebar';
 import CustomNode from './components/CustomNode';
+import SmartEdge from './components/SmartEdge';
 import GanttChart from './components/GanttChart';
 import { logger } from './utils/logger';
 import { ProjectDataProcessor } from './utils/projectDataProcessor';
@@ -33,6 +34,10 @@ const nodeTypes = {
   customTask: CustomNode,
 };
 
+const edgeTypes = {
+  smart: SmartEdge,
+};
+
 const App = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -51,74 +56,66 @@ const App = () => {
 
   // Core Render Flow using Derived State Pattern
   const renderGraph = useCallback((data, currentDrillState, activeTaskId = null) => {
-    logger.info('Deriving graph render from state...');
-    const { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState);
-    let { nodes: layoutedNodes, edges: layoutedEdges } = LayoutAlgorithm.applyLayout(visibleNodes, visibleEdges);
+    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId });
 
-    let activeNodes = new Set();
-    let activeEdges = new Set();
-    let displayMode = 'normal'; // 'normal', 'taskTrace', 'criticalPath'
+    try {
+      const { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState);
+      let { nodes: layoutedNodes, edges: layoutedEdges } = LayoutAlgorithm.applyLayout(visibleNodes, visibleEdges);
 
-    if (activeTaskId) {
-      displayMode = 'taskTrace';
-      activeNodes.add(activeTaskId);
+      let activeNodes = new Set();
+      let activeEdges = new Set();
+      let displayMode = 'normal'; // 'normal', 'taskTrace', 'criticalPath'
 
-      let added = true;
-      while (added) {
-        added = false;
-        visibleEdges.forEach(edge => {
-          if (edge.id.startsWith('e-logic-')) {
-            if (activeNodes.has(edge.source) && !activeNodes.has(edge.target)) {
-              activeNodes.add(edge.target);
-              activeEdges.add(edge.id);
-              added = true;
-            } else if (activeNodes.has(edge.target) && !activeNodes.has(edge.source)) {
-              activeNodes.add(edge.source);
-              activeEdges.add(edge.id);
-              added = true;
-            } else if (activeNodes.has(edge.source) && activeNodes.has(edge.target)) {
-              activeEdges.add(edge.id);
-            }
-          }
-        });
+      if (activeTaskId) {
+        displayMode = 'taskTrace';
+        const trace = VisibilityManager.calculateTrace(visibleNodes, visibleEdges, activeTaskId);
+        activeNodes = trace.activeNodes;
+        activeEdges = trace.activeEdges;
+      } else if (showCriticalPath) {
+        displayMode = 'criticalPath';
+        const cpm = CriticalPathAlgorithm.calculate(data);
+        activeNodes = cpm.criticalTaskIds;
+        activeEdges = cpm.criticalEdges;
       }
-    } else if (showCriticalPath) {
-      displayMode = 'criticalPath';
-      const cpm = CriticalPathAlgorithm.calculate(data);
-      activeNodes = cpm.criticalTaskIds;
-      activeEdges = cpm.criticalEdges;
-    }
 
-    if (displayMode !== 'normal') {
-      layoutedNodes = layoutedNodes.map(n => {
-        if (n.data.nodeType === 'task') {
+      if (displayMode !== 'normal') {
+        const isCritical = displayMode === 'criticalPath';
+        const edgeColor = isCritical ? '#f43f5e' : '#2dd4bf'; // Neon Rose for CPM, Teal for Trace
+
+        layoutedNodes = layoutedNodes.map(n => {
+          const isTask = n.data.nodeType === 'task';
           const isHighlighted = activeNodes.has(n.id);
+          const opacity = isHighlighted ? 1 : 0.2;
+
           return {
             ...n,
-            style: { ...n.style, opacity: isHighlighted ? 1 : 0.2 },
+            style: { ...n.style, opacity },
             data: { ...n.data, isHighlighted }
           };
-        }
-        return { ...n, style: { ...n.style, opacity: 0.2 } }; // Dim Phases/Milestones slightly
-      });
+        });
 
-      layoutedEdges = layoutedEdges.map(e => {
-        if (activeEdges.has(e.id)) {
-          const edgeColor = displayMode === 'criticalPath' ? '#f43f5e' : '#2dd4bf'; // Neon Rose for CPM, Teal for Trace
-          return {
-            ...e,
-            style: { stroke: edgeColor, strokeWidth: 3 },
-            animated: true,
-            zIndex: 10,
-            markerEnd: { type: MarkerType.ArrowClosed, color: edgeColor }
-          };
-        }
-        return { ...e, style: { ...e.style, opacity: 0.1 } };
-      });
+        layoutedEdges = layoutedEdges.map(e => {
+          if (activeEdges.has(e.id)) {
+            return {
+              ...e,
+              style: { ...e.style, stroke: edgeColor, strokeWidth: 3 },
+              animated: true,
+              zIndex: 10,
+              data: { ...e.data, isHighlighted: true },
+              markerEnd: { ...e.markerEnd, color: edgeColor }
+            };
+          }
+          return { ...e, style: { ...e.style, opacity: 0.1 } };
+        });
+      }
+
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
+    } catch (error) {
+      logger.error('View render failure', error);
+    } finally {
+      logger.endTrace();
     }
-
-    setNodes(layoutedNodes);
-    setEdges(layoutedEdges);
   }, [setNodes, setEdges, showCriticalPath]);
 
   const handleFileUpload = useCallback(async (file) => {
@@ -261,6 +258,7 @@ const App = () => {
               onNodeMouseEnter={handleNodeMouseEnter}
               onNodeMouseLeave={handleNodeMouseLeave}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               fitView
               attributionPosition="bottom-right"
               className="dark-theme"

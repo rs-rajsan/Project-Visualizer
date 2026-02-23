@@ -147,14 +147,83 @@ The goal of the implementation plan is to outline tasks, estimated duration, com
 
  ### 7.4 Advanced Dependency Differentiation (Future Ideas) 🔴
  - [x] **Semantic Color Encoding**: Assign colors based on relationship types (Intra-Milestone, Inter-Milestone, Inter-Phase) with synced arrow markers.
- - [ ] **Physical Routing Refinements**: Implement Edge Bundling for high-density paths and Incremental Offsets for left-side "bus" elbow distances.
- - [ ] **Interactive "Focus" States**: Apply Opacity Gradients for long-distance edges and Shadow Glows for active task dependency chains (Neon highlighting).
- - [ ] **Advanced Line Markers**: Differentiate "Standard Dependency" vs "Critical Milestone Blocker" using endpoint variance (Arrows vs Solid Dots).
- - [ ] **"Lens" or "Zone" Dimming**: Implement Distance-based adaptive visibility to hide logic lines at high zoom levels (LOD control).
+ - [x] **Physical Routing Refinements**: Implemented Edge Bundling for inter-milestone paths and Incremental Offsets for left-side intra-milestone connections via the new `SmartEdge` component.
  
- ---
+ 🎯 Key Enhancements:
+ 🚉 1. Incremental Offsets (Vertical Bus)
+Problem Solved: Previously, multiple dependencies within the same milestone would sit directly on top of each other on the left side, making it impossible to count or trace them.
+Solution: I've implemented a programmatic offset logic. If a milestone has 5 internal dependencies, the first one bends 20px to the left, the second 40px, the third 60px, and so on.
+Visual Result: These now appear as a neat series of concentric "loops" on the left side of the task stack, completely eliminating visual overlap.
+🖇️ 2. Edge Bundling (Inter-Milestone Bus)
+Problem Solved: High-density "Spaghetti" where many lines independently cross the screen between two different milestones.
+Solution: I created a "Bus Channeling" logic. For any group of edges traveling between the same two milestones, they now converge towards a shared central "Bus X" point, travel together in a tight bundle, and then branch out elegantly using smooth Quadratic Bezier curves as they approach their targets.
+Visual Result: This transforms chaotic cross-graph lines into organized "cable runs," making the high-level architecture of your project much clearer.
+🧠 3. The 
+
+SmartEdge
+ Component
+To make this possible, I built and registered a custom 
+
+SmartEdge.jsx
+ engine. It dynamically detects the relationship type (Intra vs. Inter) and calculates specialized SVG paths that standard React Flow edges cannot provide.
+
+The implementation plan has been updated to mark this phase as completed. You can see these clean, bundled routes immediately by loading a project with cross-milestone dependencies! What should we tackle next?
+
+ - [x] **Interactive "Focus" States**: Implemented dynamic rendering with distance-based opacity (fading long-range edges) and Neon Shadow Glows (`drop-shadow`) for the active/selected dependency chain.
+ Opacity Gradient by Distance:
+ 🎯 Key Enhancements:
+Smart Fading: The system now programmatically calculates the Euclidean distance of every connection.
+Logistics: Short, local connections remain solid, but long-range "background" dependencies (cross-phase or cross-project) now automatically fade to 25% opacity.
+Focus: This removes the "cobweb" look of complex projects, allowing you to focus on immediate task clusters until you zoom in or select a specific path.
+Neon Shadow Glows:
+
+When a task is clicked or a critical path is toggled, I've added a CSS drop-shadow(0 0 8px [color]) filter to the active edges.
+This creates a "Laser Highlight" effect where the active dependency chain literally glows and "pops" forward in 3D space, separating itself from the dimmed background.
+Adaptive Animation:
+
+Logic Cleanup: I have disabled the constant animation for general logic edges.
+Directional Intent: Moving "dash" animations are now reserved exclusively for the Critical Path or the currently selected Task Trace. Stationary lines represent stable project logic; moving lines represent your current "potential path of impact."
+
+ - [x] **Advanced Line Markers**: Differentiating "Standard Dependency" vs "Milestone Blocker" using source-point dots for cross-milestone handoffs. Implemented variable `strokeWidth` based on task importance/cost.
+ 🎯 Key Enhancements:
+Endpoint Variance (Milestone Blockers):
+
+Logic: I have introduced a "High-Stakes Handoff" detector. Any logical dependency that crosses from one milestone group to another is now tagged as a Milestone Blocker.
+Visual Marker: These specific edges now feature a Solid Circle (Dot) at their starting point in addition to the standard arrowhead. This provides an immediate visual cue for critical project handoffs that span different workstreams.
+Line Weight by Flow (Importance Scaling):
+
+Dynamic Sizing: I have linked the edge's strokeWidth to the Cost of the task it originates from.
+Visual Scale: High-cost, significant tasks now produce thicker, bolder dependency lines, while minor sub-tasks use sleek, hair-thin connections. This allows you to visually weigh the "gravity" of different dependency paths at a glance.
+Marker-End Sync:
+
+Standard internal dependencies use Closed Arrows for a clean look, while cross-milestone blockers use Open Arrows (with the new Dot at the start) to signal their unique status in the project logic.
+
+  - [x] **"Lens" or "Zone" Dimming**: Implemented zoom-based Level of Detail (LOD) control. Task-to-task dependency lines are automatically hidden at low zoom levels (<0.6) and replaced by thick, high-level Milestone Summary edges to maintain visual clarity.
  
- ## **Phase 8: Robustness & Architectural Refactoring** (Completed)
+ 🔍 Zoom-Based Level of Detail (LOD) control:
+Dynamic Clutter Reduction:
+
+Zooms Out (< 0.6): The system automatically hides the hundreds of individual task-to-task logical lines. This prevents the "spiderweb" effect when viewing the entire project from a distance.
+Milestone Summary Lines: In their place, I have introduced Thick Amber Summary Edges that connect the Milestones themselves. These represent the high-level flow of the project, showing you how entire workstreams relate to each other without geting lost in the weeds.
+Seamless Transition:
+
+Zooms In (>= 0.6): As you dive back into a specific phase, the thick summary lines fade away, and the precise, individual task dependencies gracefully reappear.
+Stability: I've optimized the 
+
+SmartEdge
+ component using React Flow's useViewport hook to ensure these transitions are buttery smooth even in massive project graphs.
+Intelligent Visibility:
+
+The summary lines only appear if there is at least one logical dependency crossing between those milestones.
+All existing features like Neon Glows, Edge Bundling, and Importance Weighting still work perfectly within this new LOD system.
+### 7.5 Architectural Refinement & Security (Completed) 🟢
+- [x] **SOLID Logic Extraction**: Moved complex BFS dependency tracing from `App.jsx` into `VisibilityManager.calculateTrace` to ensure single responsibility.
+- [x] **Centralized Request Tracing**: Integrated `logger.startTrace` into the core `renderGraph` cycle. Every UI update is now linked to a unique trace ID for easier debugging of complex layout states.
+- [x] **Secure Logging Policy**: Verified and scrubbed all instances of `console.log`. The application strictly uses the centralized `Logger` framework to prevent metadata leakage in production.
+
+---
+
+## **Phase 8: Robustness & Architectural Refactoring** (Completed) 🟢
 
 ### 8.1 Consolidated State Management 🟢
 - [x] Implement "Single Source of Truth" pattern in `App.jsx`.
