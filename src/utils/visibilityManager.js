@@ -6,10 +6,11 @@ export class VisibilityManager {
      * Derives visible nodes and edges based on raw standardized data and expansion state.
      * @param {Array<Object>} rawData 
      * @param {Object} drillState - { expandedPhases: Set<string>, expandedMilestones: Set<string> }
+     * @param {Object} internalFilter - { assignee: string | null }
      * @returns {Object} { nodes, edges }
      */
-    static deriveGraph(rawData, drillState) {
-        const traceId = logger.startTrace({ action: 'derive_graph' });
+    static deriveGraph(rawData, drillState, internalFilter = {}) {
+        const traceId = logger.startTrace({ action: 'derive_graph', filter: internalFilter });
 
         try {
             const nodes = [];
@@ -17,9 +18,13 @@ export class VisibilityManager {
 
             // Group data by Phase -> Milestone -> Task
             const phases = {};
-            const ungroupedTasks = [];
 
             rawData.forEach(task => {
+                // Apply Filter if present
+                if (internalFilter.assignee && task.assignee !== internalFilter.assignee) {
+                    return;
+                }
+
                 const phaseName = task.phase || 'Unphased';
                 const milestoneName = task.milestone || 'Unmilestoned';
 

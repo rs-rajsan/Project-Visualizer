@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -11,13 +11,14 @@ import 'reactflow/dist/style.css'; // Essential ReactFlow styles
 import Sidebar from './components/Sidebar';
 import CustomNode from './components/CustomNode';
 import SmartEdge from './components/SmartEdge';
-import GanttChart from './components/GanttChart';
+import { GanttChart } from './components/GanttChart';
+import { ResourceHeatmap } from './components/ResourceHeatmap';
 import { logger } from './utils/logger';
 import { ProjectDataProcessor } from './utils/projectDataProcessor';
 import { LayoutAlgorithm } from './utils/layoutAlgorithm';
 import { VisibilityManager } from './utils/visibilityManager';
 import { CriticalPathAlgorithm } from './utils/criticalPathAlgorithm';
-import { ExportService } from './utils/ExportService';
+import { ExportService } from './utils/exportService';
 
 // Initial dummy elements for placeholder canvas
 const initialNodes = [
@@ -53,15 +54,16 @@ const App = () => {
   const [userPositions, setUserPositions] = useState({}); // Stores manual drags
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
-  const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt'
+  const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt' | 'resources'
+  const [assigneeFilter, setAssigneeFilter] = useState(null);
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
-  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions) => {
-    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId });
+  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions, currentAssigneeFilter = assigneeFilter) => {
+    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId, filter: currentAssigneeFilter });
 
     try {
-      let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState);
+      let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState, { assignee: currentAssigneeFilter });
 
       // Apply user overrides before layout
       visibleNodes = visibleNodes.map(node => {
@@ -127,7 +129,7 @@ const App = () => {
     } finally {
       logger.endTrace();
     }
-  }, [setNodes, setEdges, showCriticalPath]);
+  }, [setNodes, setEdges, showCriticalPath, drillState, userPositions, assigneeFilter]);
 
   const handleFileUpload = useCallback(async (file) => {
     logger.info(`App component received file: ${file.name}`);
@@ -310,11 +312,22 @@ const App = () => {
   // React to Critical Path toggles automatically
   useEffect(() => {
     if (rawData.length > 0) {
-      renderGraph(rawData, drillState, selectedTaskId);
+      renderGraph(rawData, drillState, selectedTaskId, userPositions, assigneeFilter);
     }
-    // Only re-run when the toggle state specifically changes by user
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCriticalPath]);
+  }, [rawData, drillState, selectedTaskId, showCriticalPath, assigneeFilter, userPositions, renderGraph]);
+
+  const uniqueAssignees = useMemo(() => {
+    const assignees = new Set();
+    rawData.forEach(task => {
+      if (task.assignee) assignees.add(String(task.assignee).trim());
+    });
+    return Array.from(assignees).filter(Boolean).sort();
+  }, [rawData]);
+
+  const filteredData = useMemo(() => {
+    if (!assigneeFilter) return rawData;
+    return rawData.filter(t => String(t.assignee).trim() === assigneeFilter);
+  }, [rawData, assigneeFilter]);
 
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans">
@@ -325,6 +338,9 @@ const App = () => {
         setViewMode={setViewMode}
         onExportCSV={handleExportCSV}
         onExportExcel={handleExportExcel}
+        assignees={uniqueAssignees}
+        selectedAssignee={assigneeFilter}
+        onAssigneeFilter={setAssigneeFilter}
       />
 
       {/* Main Canvas Area */}
@@ -348,15 +364,19 @@ const App = () => {
         </header>
 
         {/* Main Workspace Area */}
-        <div className="pt-14 h-full w-full bg-slate-950">
+        <div className="pt-14 h-full w-full bg-slate-950 overflow-auto custom-scrollbar">
           {viewMode === 'gantt' ? (
             <GanttChart
-              data={rawData}
+              data={filteredData}
               drillState={drillState}
               onTogglePhase={(p) => handleNodeClick(null, { data: { nodeType: 'phase', name: p } })}
               onToggleMilestone={(m) => handleNodeClick(null, { data: { nodeType: 'milestone', name: m } })}
               onTaskUpdate={handleTaskUpdate}
             />
+          ) : viewMode === 'resources' ? (
+            <div className="p-6">
+              <ResourceHeatmap data={filteredData} />
+            </div>
           ) : (
             <ReactFlow
               nodes={nodes}

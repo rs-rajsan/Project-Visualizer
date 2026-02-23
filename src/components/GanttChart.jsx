@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { logger } from '../utils/logger';
+import { DateUtils } from '../utils/DateUtils';
 
 export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone, onTaskUpdate }) => {
     const [dragInfo, setDragInfo] = useState(null); // { id, startX, currentX }
@@ -14,28 +15,15 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
             let latest = new Date('1970-01-01').getTime();
 
             const tasksWithDates = data.map(task => {
-                let start = new Date();
-                let end = new Date();
+                const bounds = DateUtils.getTaskBounds(task);
 
-                if (task.startDate) {
-                    start = new Date(task.startDate);
-                }
-
-                if (task.endDate) {
-                    end = new Date(task.endDate);
-                } else if (task.cost) {
-                    // Assume cost is duration in days
-                    end = new Date(start);
-                    end.setDate(end.getDate() + parseInt(task.cost, 10));
-                }
-
-                const startTime = start.getTime();
-                const endTime = end.getTime();
+                const startTime = bounds.startTime;
+                const endTime = bounds.endTime;
 
                 if (!isNaN(startTime) && startTime < earliest) earliest = startTime;
                 if (!isNaN(endTime) && endTime > latest) latest = endTime;
 
-                return { ...task, start, end, startTime, endTime };
+                return { ...task, ...bounds };
             });
 
             if (earliest > latest) {

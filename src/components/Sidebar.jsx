@@ -1,8 +1,17 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List, Download } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown } from 'lucide-react';
 import { logger } from '../utils/logger';
 
-const Sidebar = ({ onFileUpload, viewMode, setViewMode, onExportCSV, onExportExcel }) => {
+const Sidebar = ({
+    onFileUpload,
+    viewMode,
+    setViewMode,
+    onExportCSV,
+    onExportExcel,
+    assignees = [],
+    selectedAssignee = null,
+    onAssigneeFilter
+}) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -116,21 +125,50 @@ const Sidebar = ({ onFileUpload, viewMode, setViewMode, onExportCSV, onExportExc
                     <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
                         View Mode
                     </h2>
-                    <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+                    <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700 flex-wrap lg:flex-nowrap gap-1">
                         <button
                             onClick={() => setViewMode('network')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'network' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                            className={`flex-1 min-w-[60px] flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-bold rounded-md transition-all ${viewMode === 'network' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                         >
-                            <Network className="w-4 h-4" />
+                            <Network className="w-3.5 h-3.5" />
                             Graph
                         </button>
                         <button
                             onClick={() => setViewMode('gantt')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all ${viewMode === 'gantt' ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                            className={`flex-1 min-w-[60px] flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-bold rounded-md transition-all ${viewMode === 'gantt' ? 'bg-teal-500/20 text-teal-300 shadow-sm border border-teal-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
                         >
-                            <List className="w-4 h-4" />
+                            <List className="w-3.5 h-3.5" />
                             Gantt
                         </button>
+                        <button
+                            onClick={() => setViewMode('resources')}
+                            className={`flex-1 min-w-[60px] flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-bold rounded-md transition-all ${viewMode === 'resources' ? 'bg-orange-500/20 text-orange-300 shadow-sm border border-orange-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        >
+                            <Users className="w-3.5 h-3.5" />
+                            Resources
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-8">
+                    <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Filter className="w-3 h-3 text-indigo-400" />
+                        Assignee Filter
+                    </h2>
+                    <div className="relative">
+                        <select
+                            value={selectedAssignee || ''}
+                            onChange={(e) => onAssigneeFilter(e.target.value || null)}
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-4 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer hover:bg-slate-700/50 transition-colors"
+                        >
+                            <option value="">All Assignees</option>
+                            {assignees.map(person => (
+                                <option key={person} value={person}>{person}</option>
+                            ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                            <ChevronDown className="w-4 h-4" />
+                        </div>
                     </div>
                 </div>
 

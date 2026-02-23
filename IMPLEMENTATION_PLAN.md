@@ -457,15 +457,33 @@ What is our next objective? Would you like to refine any of these interactions, 
 ## **Phase 11: Resource & Workload Management** (Est. 3-5 Hours)
 *Design Principle: Use **SOLID Pattern** to extend `VisibilityManager` for resource filtering. Ensure **DRY logic** for daily delta calculations.*
 
-### 11.1 Resource Heatmap 🔴
-- [ ] Create `ResourceHeatmap.jsx` (Follows data-driven render pattern).
-- [ ] Implement central logic to calculate daily workloads (Reuses existing `projectDataProcessor` date math).
-- [ ] Integrate **Centralized Tracing** for heatmap rendering and calculation cycles.
+### 11.1 Resource Heatmap �
+- [x] **DateUtils.js**: Created a shared utility for date parsing and range generation (Following DRY).
+- [x] **WorkloadManager.js**: Implemented logic to calculate daily resource workloads with **Centralized Tracing**.
+- [x] **ResourceHeatmap.jsx**: Built a high-fidelity matrix visualization display daily allocation per assignee with status alerts.
+- [x] **View Integration**: Added "Resources" mode to the Sidebar and main application layout.
 
-### 11.2 Assignee Filtering 🔴
-- [ ] Add "Assignee" dropdown to Sidebar or Header.
-- [ ] Update `VisibilityManager` to filter nodes/tasks based on selected assignee.
-- [ ] Ensure Gantt chart and Graph both respect assignee filters.
+### 11.2 Assignee Filtering �
+- [x] **Sidebar Integration**: Added a high-visibility dropdown for assignee selection with "All Assignees" fallback.
+- [x] **VisibilityManager Enhancement**: Updated `deriveGraph` to support server-side style filtering during the data derivation cycle.
+- [x] **Cross-View Sync**: Ensured Graph, Gantt, and Heatmap all react to the active assignee filter via a centralized `filteredData` selector.
+
+ Filtering Features:
+Sidebar Dropdown:
+
+Dynamic Discovery: The system automatically extracts a unique list of team members from your uploaded data and populates a new "Assignee Filter" section in the Sidebar.
+Styled Interaction: Features a native dark-mode dropdown with a filter icon, allowing for instant isolation of specific resources.
+Universal State Sync:
+
+Reactive UI: I've implemented a centralized filteredData selector in 
+
+App.jsx
+. When you select an assignee, all three views (Graph, Gantt, and Heatmap) update simultaneously.
+Isolating Workflows: The Graph view now specifically isolates the logical nodes and dependencies belonging to the selected individual, while the Heatmap narrows down to show only their specific daily load.
+Architecture (SOLID/DRY):
+
+VisibilityManager Extension: I've updated the derivation engine to respect filtering logic without breaking structural integrity (e.g., maintaining the necessary Phase/Milestone groups).
+Tracing Support: All filtering actions are tracked with specific trace metadata in the centralized logger.
 
 ### 11.3 Visual Refinements & Interactive Highlighting 🟢
 - [x] Implement "Light-on-Dark" high-contrast node aesthetic for Dark Mode.
