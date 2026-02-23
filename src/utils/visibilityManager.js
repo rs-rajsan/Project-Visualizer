@@ -1,4 +1,5 @@
 import { logger } from './logger';
+import { MarkerType } from 'reactflow';
 
 export class VisibilityManager {
     /**
@@ -69,6 +70,7 @@ export class VisibilityManager {
                         targetHandle: 'top-target',
                         type: 'straight',
                         style: { stroke: '#475569', strokeWidth: 2, strokeDasharray: '3 3' },
+                        markerEnd: { type: MarkerType.ArrowClosed, color: '#475569' },
                         animated: false
                     });
                 }
@@ -103,6 +105,7 @@ export class VisibilityManager {
                             targetHandle: 'left-target',
                             type: 'straight',
                             style: { stroke: '#818cf8', strokeWidth: 2, strokeDasharray: '5 5' },
+                            markerEnd: { type: MarkerType.ArrowClosed, color: '#818cf8' },
                             animated: false
                         });
 
@@ -129,6 +132,7 @@ export class VisibilityManager {
                                     targetHandle: 'top-target',
                                     type: 'straight',
                                     style: { stroke: '#fb923c', strokeWidth: 2, strokeDasharray: '5 5' },
+                                    markerEnd: { type: MarkerType.ArrowClosed, color: '#fb923c' },
                                     animated: false
                                 });
                             });
@@ -154,10 +158,11 @@ export class VisibilityManager {
                                 source: sourceId,
                                 target: String(task.id),
                                 sourceHandle: 'right-source',
-                                targetHandle: 'left-target',
+                                targetHandle: 'right-target',
                                 type: 'smoothstep',
                                 animated: true,
-                                style: { stroke: '#94a3b8', strokeWidth: 2 }
+                                style: { stroke: '#94a3b8', strokeWidth: 2 },
+                                markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' }
                             });
                         }
                     });

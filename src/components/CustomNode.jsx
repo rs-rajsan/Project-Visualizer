@@ -33,6 +33,7 @@ const CustomNode = ({ data, selected }) => {
             <div className={clsx("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all", getThemeClasses(), selected && 'ring-2 ring-teal-400 scale-125')}>
                 <Handle type="target" position={Position.Top} id="top-target" className="opacity-0" />
                 <Handle type="target" position={Position.Left} id="left-target" className="opacity-0" />
+                <Handle type="target" position={Position.Right} id="right-target" className="opacity-0" />
                 <span className="text-[8px] font-bold">{data.id}</span>
                 <Handle type="source" position={Position.Bottom} id="bottom-source" className="opacity-0" />
                 <Handle type="source" position={Position.Right} id="right-source" className="opacity-0" />
@@ -52,6 +53,7 @@ const CustomNode = ({ data, selected }) => {
             {/* Target Handles */}
             <Handle type="target" position={Position.Top} id="top-target" className="w-2 h-2 border-2 left-1/2 -mt-[1px]" style={{ background: '#fff' }} />
             <Handle type="target" position={Position.Left} id="left-target" className="w-2 h-2 border-2 top-1/2 -ml-[1px]" style={{ background: '#fff' }} />
+            <Handle type="target" position={Position.Right} id="right-target" className="opacity-0 top-1/2 right-0" />
 
             <div className="p-1.5">
                 <div className="flex justify-between items-start mb-1">
