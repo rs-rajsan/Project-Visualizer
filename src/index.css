@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  --color-indigo-50: #eef2ff;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+
+  --color-teal-400: #2dd4bf;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--color-slate-100);
+  background-color: var(--color-slate-900);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-slate-700);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-slate-600);
+}
+
+/* React Flow Dark Theme Overrides */
+.react-flow.dark-theme .react-flow__pane {
+  background-color: var(--color-slate-950);
+}
+
+.react-flow.dark-theme .react-flow__node {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.react-flow.dark-theme .react-flow__node:hover {
+  transform: none;
+  /* Let CustomNode handle the hover scaling */
+}
+
+.react-flow.dark-theme .react-flow__handle {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-indigo-400);
+  border: 2px solid var(--color-slate-900);
+}
+
+.react-flow.dark-theme .react-flow__edge-path {
+  stroke-width: 2px;
+  stroke: var(--color-slate-600);
+}
+
+.react-flow.dark-theme .react-flow__controls-button {
+  background-color: var(--color-slate-800);
+  border-color: var(--color-slate-700);
+  fill: var(--color-slate-400);
+}
+
+.react-flow.dark-theme .react-flow__controls-button:hover {
+  background-color: var(--color-slate-700);
+}
