@@ -17,6 +17,7 @@ import { ProjectDataProcessor } from './utils/projectDataProcessor';
 import { LayoutAlgorithm } from './utils/layoutAlgorithm';
 import { VisibilityManager } from './utils/visibilityManager';
 import { CriticalPathAlgorithm } from './utils/criticalPathAlgorithm';
+import { ExportService } from './utils/ExportService';
 
 // Initial dummy elements for placeholder canvas
 const initialNodes = [
@@ -49,17 +50,27 @@ const App = () => {
     expandedPhases: new Set(),
     expandedMilestones: new Set(),
   });
+  const [userPositions, setUserPositions] = useState({}); // Stores manual drags
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt'
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
-  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null) => {
+  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions) => {
     const traceId = logger.startTrace({ action: 'render_graph', activeTaskId });
 
     try {
-      const { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState);
+      let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState);
+
+      // Apply user overrides before layout
+      visibleNodes = visibleNodes.map(node => {
+        if (existingUserPositions[node.id]) {
+          return { ...node, position: existingUserPositions[node.id] };
+        }
+        return node;
+      });
+
       let { nodes: layoutedNodes, edges: layoutedEdges } = LayoutAlgorithm.applyLayout(visibleNodes, visibleEdges);
 
       let activeNodes = new Set();
@@ -181,6 +192,98 @@ const App = () => {
     });
   }, [rawData, drillState, selectedTaskId, renderGraph]);
 
+  const onConnect = useCallback((params) => {
+    logger.info('Creating new dependency', params);
+    setRawData(prev => {
+      const newData = [...prev];
+      // Target task is the one receiving the connection
+      const targetTask = newData.find(t => String(t.id) === params.target);
+      if (targetTask) {
+        const currentDeps = targetTask.dependencies ? String(targetTask.dependencies).split(',').map(d => d.trim()).filter(Boolean) : [];
+        if (!currentDeps.includes(params.source)) {
+          currentDeps.push(params.source);
+          targetTask.dependencies = currentDeps.join(', ');
+          logger.debug(`Updated dependencies for task ${targetTask.id}: ${targetTask.dependencies}`);
+        }
+      }
+      // Re-render graph with new data
+      setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
+      return newData;
+    });
+  }, [drillState, selectedTaskId, renderGraph]);
+
+  const onEdgesDelete = useCallback((edgesToDelete) => {
+    logger.info('Deleting edges', edgesToDelete);
+    setRawData(prev => {
+      const newData = prev.map(task => {
+        const newTask = { ...task };
+        const logicalEdges = edgesToDelete.filter(e => e.id.startsWith('e-logic-'));
+
+        logicalEdges.forEach(edge => {
+          if (String(newTask.id) === edge.target) {
+            const currentDeps = newTask.dependencies ? String(newTask.dependencies).split(',').map(d => d.trim()).filter(Boolean) : [];
+            const filteredDeps = currentDeps.filter(d => d !== edge.source);
+            newTask.dependencies = filteredDeps.join(', ');
+          }
+        });
+        return newTask;
+      });
+
+      setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
+      return newData;
+    });
+  }, [drillState, selectedTaskId, renderGraph]);
+
+  const handleTaskUpdate = useCallback((taskId, dayDelta) => {
+    logger.info(`Updating task ${taskId} by ${dayDelta} days`);
+    setRawData(prev => {
+      const newData = prev.map(task => {
+        if (String(task.id) === taskId) {
+          const newTask = { ...task };
+
+          if (newTask.startDate) {
+            const start = new Date(newTask.startDate);
+            start.setDate(start.getDate() + dayDelta);
+            newTask.startDate = start.toISOString().split('T')[0];
+          }
+
+          if (newTask.endDate) {
+            const end = new Date(newTask.endDate);
+            end.setDate(end.getDate() + dayDelta);
+            newTask.endDate = end.toISOString().split('T')[0];
+          }
+
+          return newTask;
+        }
+        return task;
+      });
+
+      setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
+      return newData;
+    });
+  }, [drillState, selectedTaskId, renderGraph]);
+
+  const handleNodesChange = useCallback((changes) => {
+    // Capture manual position changes
+    changes.forEach(change => {
+      if (change.type === 'position' && change.position) {
+        setUserPositions(prev => ({
+          ...prev,
+          [change.id]: change.position
+        }));
+      }
+    });
+    onNodesChange(changes);
+  }, [onNodesChange]);
+
+  const handleExportCSV = useCallback(() => {
+    ExportService.exportToCSV(rawData, 'project_data_export.csv');
+  }, [rawData]);
+
+  const handleExportExcel = useCallback(() => {
+    ExportService.exportToExcel(rawData, 'project_data_export.xlsx');
+  }, [rawData]);
+
   const handlePaneClick = useCallback(() => {
     if (selectedTaskId) {
       setSelectedTaskId(null);
@@ -216,7 +319,13 @@ const App = () => {
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans">
       {/* Sidebar Component */}
-      <Sidebar onFileUpload={handleFileUpload} viewMode={viewMode} setViewMode={setViewMode} />
+      <Sidebar
+        onFileUpload={handleFileUpload}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onExportCSV={handleExportCSV}
+        onExportExcel={handleExportExcel}
+      />
 
       {/* Main Canvas Area */}
       <div className="flex-1 relative h-full w-full">
@@ -246,17 +355,21 @@ const App = () => {
               drillState={drillState}
               onTogglePhase={(p) => handleNodeClick(null, { data: { nodeType: 'phase', name: p } })}
               onToggleMilestone={(m) => handleNodeClick(null, { data: { nodeType: 'milestone', name: m } })}
+              onTaskUpdate={handleTaskUpdate}
             />
           ) : (
             <ReactFlow
               nodes={nodes}
               edges={edges}
-              onNodesChange={onNodesChange}
+              onNodesChange={handleNodesChange}
               onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onEdgesDelete={onEdgesDelete}
               onNodeClick={handleNodeClick}
               onPaneClick={handlePaneClick}
               onNodeMouseEnter={handleNodeMouseEnter}
               onNodeMouseLeave={handleNodeMouseLeave}
+              deleteKeyCode={['Backspace', 'Delete']}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               fitView

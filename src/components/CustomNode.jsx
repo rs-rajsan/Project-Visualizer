@@ -53,78 +53,73 @@ const CustomNode = ({ data, selected }) => {
             )}
         >
             {/* Target Handles */}
-            <Handle type="target" position={Position.Top} id="top-target" className="w-2 h-2 border-2 left-1/2 -mt-[1px]" style={{ background: '#fff' }} />
+            <Handle
+                type="target"
+                position={Position.Top}
+                id="top-target"
+                className="w-3 h-3 border-2 border-white -mt-1.5 transition-all hover:scale-150 hover:bg-teal-400 z-50"
+                style={{ background: '#fff' }}
+            />
             <Handle type="target" position={Position.Bottom} id="bottom-target" className="opacity-0 bottom-0 left-1/2" />
-            <Handle type="target" position={Position.Left} id="left-target" className="w-2 h-2 border-2 top-1/2 -ml-[1px]" style={{ background: '#fff' }} />
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="left-target"
+                className="w-3 h-3 border-2 border-white -ml-1.5 transition-all hover:scale-150 hover:bg-teal-400 z-50"
+                style={{ background: '#fff' }}
+            />
             <Handle type="target" position={Position.Right} id="right-target" className="opacity-0 top-1/2 right-0" />
 
-            <div className="p-1.5">
-                <div className="flex justify-between items-start mb-1">
-                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-70 truncate max-w-[50px]">
+            <div className="p-1.5 h-full flex flex-col justify-center">
+                <div className="flex justify-between items-start mb-0.5">
+                    <span className="text-[7px] font-bold uppercase tracking-wider opacity-60 truncate max-w-[40px]">
                         {data.nodeType === 'phase' ? 'PH: ' : data.nodeType === 'milestone' ? 'MS: ' : ''}{data.id}
                     </span>
-                    <div className="flex items-center gap-2">
-                        {data.nodeType !== 'task' && data.childCount > 0 && (
-                            <div className="flex items-center gap-0.5 text-[8px] font-medium opacity-80 bg-white/20 px-1 rounded" title={`${data.childCount} Items`}>
-                                {data.childCount} {data.nodeType === 'phase' ? 'MS' : 'Tasks'}
-                            </div>
-                        )}
+                    <div className="flex items-center gap-1.5">
                         {data.nodeType === 'task' && data.dependencies && (
-                            <div className="flex items-center gap-0.5 text-[8px] font-medium opacity-80" title={`${String(data.dependencies).split(',').filter(Boolean).length} Dependencies`}>
-                                <Link className="w-2 h-2 text-indigo-500" />
-                                {String(data.dependencies).split(',').map(d => d.trim()).filter(Boolean).length}
+                            <div className="flex items-center gap-0.5 text-[7px] font-medium opacity-70">
+                                <Link className="w-1.5 h-1.5 text-indigo-500" />
+                                {String(data.dependencies).split(',').filter(Boolean).length}
                             </div>
                         )}
                         {data.progress && data.nodeType === 'task' && (
-                            <div className="flex items-center gap-0.5 text-[8px] font-medium opacity-80">
-                                <CheckCircle2 className="w-2 h-2 text-emerald-600" />
+                            <div className="flex items-center gap-0.5 text-[7px] font-medium opacity-70">
+                                <CheckCircle2 className="w-1.5 h-1.5 text-emerald-600" />
                                 {data.progress}
                             </div>
                         )}
                     </div>
                 </div>
 
-                <h3 className="font-bold text-[10px] leading-tight mb-1 truncate" title={data.name}>
+                <h3 className="font-bold text-[9px] leading-tight mb-0.5 truncate" title={data.name}>
                     {data.name}
                 </h3>
 
                 {data.nodeType !== 'task' && (
-                    <div className="text-[8px] font-semibold opacity-60 mt-1 flex items-center justify-between">
+                    <div className="text-[7px] font-semibold opacity-60 mt-0.5 flex items-center justify-between">
                         <span>{data.isExpanded ? 'Collapse' : 'Expand'}</span>
-                        <span className="bg-black/10 px-1 py-0.5 rounded text-[6px]">Group</span>
-                    </div>
-                )}
-
-                {/* Extended Details - Rendered dynamically via Lod at high zoom levels */}
-                {isLarge && data.nodeType === 'task' && (
-                    <div className="mt-1.5 pt-1.5 border-t border-black/10 flex flex-col gap-1 text-[8px]">
-                        {data.assignee && (
-                            <div className="flex items-center gap-1.5 opacity-80">
-                                <User className="w-2 h-2 text-slate-500" />
-                                <span className="truncate">{data.assignee}</span>
-                            </div>
-                        )}
-                        {data.startDate && (
-                            <div className="flex items-center gap-1.5 opacity-80">
-                                <Calendar className="w-2 h-2 text-slate-500" />
-                                <span>{data.startDate} {data.cost && `(${data.cost})`}</span>
-                            </div>
-                        )}
-                        {data.milestone && (
-                            <div className="flex items-center gap-1.5 opacity-80">
-                                <span className="w-1 h-1 rounded-full bg-current" />
-                                <span className="truncate">{data.milestone}</span>
-                            </div>
-                        )}
+                        <span className="bg-black/5 px-1 py-0.2 rounded text-[5px]">Group</span>
                     </div>
                 )}
             </div>
 
             {/* Source Handles */}
             <Handle type="source" position={Position.Top} id="top-source" className="opacity-0 top-0 left-1/2" />
-            <Handle type="source" position={Position.Bottom} id="bottom-source" className="w-2 h-2 border-2 left-1/2 -mb-[1px]" style={{ background: '#fff' }} />
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                id="bottom-source"
+                className="w-3 h-3 border-2 border-white -mb-1.5 transition-all hover:scale-150 hover:bg-teal-400 z-50"
+                style={{ background: '#fff' }}
+            />
             <Handle type="source" position={Position.Left} id="left-source" className="opacity-0 top-1/2 left-0" />
-            <Handle type="source" position={Position.Right} id="right-source" className="w-2 h-2 border-2 top-1/2 -mr-[1px]" style={{ background: '#fff' }} />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="right-source"
+                className="w-3 h-3 border-2 border-white -mr-1.5 transition-all hover:scale-150 hover:bg-teal-400 z-50"
+                style={{ background: '#fff' }}
+            />
         </div>
     );
 };

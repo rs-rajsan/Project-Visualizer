@@ -30,19 +30,23 @@ ID,Task Name,Phase,Milestone,Predecessors,Start Date
 4,Integrate Backend,2. Core Logic,Integration,2,3,2025-01-07
 ```
 
-## Application Interactions (Phase 1, 2 & 3)
-- Navigating the UI features a clean `Light-on-Dark` aesthetic.
-- The **Sidebar DropZone** captures file drag & drop interactivity for either CSV or complete Excel/`.xlsx` files.
-- The system automatically parses your headers based on a built-in Fuzzy Match algorithm (e.g. `task no` equals `id`).
-- It seamlessly integrates with a central logger framework allowing engineers to debug request traces natively.
-- **Level of Detail (LOD) Zoom:** The nodes update their visual density based on your zoom scale. Zoom out significantly to only see minimal dots and connections (`<0.4x`). Zoom in standard (`~1x`) to see standard labels. Zoom in closely (`>0.8x`) to view dynamic sub-information like Start Dates, Assignees, and progress checkmarks natively.
-- **0% Overlap Algorithmic Layout:** The system utilizes `Dagre` layout routing to guarantee elements do not overlap sequentially upon upload.
-- **Expandable Hierarchy:** The main canvas is fully interactive. Clicking on a `Phase` node expands its relative `Milestones`. Clicking a `Milestone` exposes all corresponding granular `Tasks` and logic lines.
-- **Dynamic Breadcrumbs:** Hovering over any element in the canvas natively calculates your view path updating the global app header with exact phase locations.
+## Application Interactions (Latest Features)
+- **Interactive Dependency Editing:**
+    - **Connect Nodes:** In the Graph view, drag from the bottom or right handles of a node to a target node handle to create a new dependency.
+    - **Delete Dependencies:** Select an edge in the Graph view and press the `Delete` or `Backspace` key to remove the relationship permanently.
+- **Gantt Timeline Management:**
+    - **Drag-to-Shift:** Grab any task bar in the Gantt Chart and slide it horizontally to adjust the `Start` and `End` dates. The system calculates the shift in days automatically.
+- **Data Exporting:**
+    - Download your updated project data at any time via the **Sidebar Export** buttons. Supports both **CSV** and **Excel (.xlsx)** formats.
+- **Persistent Layouts:** Manual node repositioning in the Graph view is now "sticky"—the system remembers your custom organization even when switching views or expanding/collapsing groups.
+- **Level of Detail (LOD) Zoom:** The nodes update their visual density based on your zoom scale.
+    - **Tiny (<0.4x):** Minimal dots for high-level structure.
+    - **Standard (~1x):** Full labels and status icons.
+    - **Detailed (>0.8x):** Expanded task details including Assignees and Date strings.
+- **Cross-View Synchronization:** All changes made via drag-and-drop in either the Graph or Gantt view are instantly reflected across the entire application and the exported data sets.
 
-## For Developers: Advanced Logging
-The application relies strictly on centralized logging provided by the `logger.js` singleton. Use the `logger` interface instead of `console.log()` across application domains.
-
-1. **Imports:** `import { logger } from './utils/logger';`
-2. **Features:** Every major user flow utilizes Trace IDs generated automatically via `logger.startTrace()`. Wait to trigger this function when logical chains begin spanning across multi-component trees.
-3. **Log Levels:** Uses standard `debug, info, warn, error`.
+## For Developers: Best Practices
+This project is built to enterprise standards:
+1. **SOLID Refactoring:** Logic for Visibility, Layout, and Export is decoupled into standalone services.
+2. **Centralized Tracing:** Every major action from file upload to graph render is associated with a unique Trace ID in the `logger`.
+3. **PM Integration Interface:** Developers can extend `PMIntegration.js` to add more connectors (e.g., Jira, Trello) using the provided abstract contract.

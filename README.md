@@ -1,16 +1,57 @@
-# React + Vite
+# Project-Flow Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A sophisticated project dependency visualization and management tool built with **React**, **React Flow**, and **Tailwind CSS**. 
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multi-View Visualization**: 
+    - **Network Graph**: Advanced hierarchical layout with interactive Phase/Milestone drill-down.
+    - **Gantt Chart**: Precise timeline view with integrated progress tracking and grouping.
+- **Dynamic Interaction Engine**:
+    - **Drag-to-Connect**: Create project dependencies directly on the graph with high-visibility interactive handles.
+    - **Timeline Shifting**: Drag-and-drop Gantt bars to adjust task dates with automatic day-delta calculation.
+- **Smart Data Processing**:
+    - **Fuzzy Header Mapping**: Intelligent import from CSV and Excel (XLSX) regardless of column naming conventions.
+    - **Level of Detail (LOD) Zoom**: Dynamic visual density that adapts based on the viewport scale.
+- **Enterprise Ready**:
+    - **Full Data Export**: Export your updated project state back to CSV or Excel.
+    - **Adapter-Based Integrations**: Pre-architected abstract interface for Jira and MS Project connectivity.
+- **Centralized Tracing**: Native request tracing framework integrated across all core services for maximum debuggability.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 18+ (Vite)
+- **Graph Engine**: React Flow
+- **Styling**: Tailwind CSS / Vanilla CSS
+- **Data Parsing**: PapaParse (CSV), SheetJS (Excel)
+- **Icons**: Lucide React
+- **Logging**: Custom Singleton with Request Tracing
 
-## Expanding the ESLint configuration
+## 📐 Architectural Principles
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project strictly adheres to modern software engineering standards:
+- **SOLID**: Each utility (VisibilityManager, LayoutAlgorithm, ExportService) has a single, well-defined responsibility.
+- **DRY (Don't Repeat Yourself)**: Shared logic is consolidated into modular utility classes.
+- **Design Patterns**: 
+    - **Strategy Pattern** for file parsing.
+    - **Adapter Pattern** for PM tool integrations.
+    - **Singleton Pattern** for logging and state orchestration.
+
+## 📦 Getting Started
+
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Run Dev Server**:
+   ```bash
+   npm run dev
+   ```
+
+3. **Usage**:
+   - Refer to `USER_GUIDE.md` for data schema requirements and interaction tips.
+
+---
+
+*Built with ❤️ by Antigravity (Advanced Agentic Coding)*

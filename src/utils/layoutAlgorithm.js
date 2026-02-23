@@ -20,22 +20,29 @@ export class LayoutAlgorithm {
             const phases = layoutedNodes.filter(n => n.data.nodeType === 'phase');
 
             phases.forEach((phase) => {
-                phase.position = { x: 0, y: currentPhaseY };
+                // Only calculate position if not already set (User Override support)
+                if (!phase.position || (phase.position.x === 0 && phase.position.y === 0)) {
+                    phase.position = { x: 0, y: currentPhaseY };
+                }
 
                 const milestones = layoutedNodes.filter(n => n.data.nodeType === 'milestone' && n.data.phase === phase.data.name);
 
                 let currentMilestoneX = milestoneSpacingX;
-                let maxTaskYForPhase = currentPhaseY;
+                let maxTaskYForPhase = phase.position.y;
 
                 milestones.forEach((milestone) => {
-                    milestone.position = { x: currentMilestoneX, y: currentPhaseY };
+                    if (!milestone.position || (milestone.position.x === 0 && milestone.position.y === 0)) {
+                        milestone.position = { x: currentMilestoneX, y: phase.position.y };
+                    }
 
                     const tasks = layoutedNodes.filter(n => n.data.nodeType === 'task' && n.data.milestone === milestone.data.name && n.data.phase === phase.data.name);
 
-                    let currentTaskY = currentPhaseY + taskSpacingY;
+                    let currentTaskY = milestone.position.y + taskSpacingY;
 
                     tasks.forEach((task) => {
-                        task.position = { x: currentMilestoneX, y: currentTaskY };
+                        if (!task.position || (task.position.x === 0 && task.position.y === 0)) {
+                            task.position = { x: milestone.position.x, y: currentTaskY };
+                        }
                         currentTaskY += taskSpacingY;
                     });
 
@@ -46,8 +53,8 @@ export class LayoutAlgorithm {
                     currentMilestoneX += milestoneSpacingX;
                 });
 
-                // Advance Y position for the next phase to be below the lowest task or milestone of this phase
-                currentPhaseY = maxTaskYForPhase + phaseSpacingY;
+                // Advance Y position for the next phase
+                currentPhaseY = Math.max(currentPhaseY, maxTaskYForPhase) + phaseSpacingY;
             });
 
             // 3. Physical Routing Refinements: Tracking for Bundling and Offsets

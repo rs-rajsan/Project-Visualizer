@@ -345,32 +345,124 @@ Conclusion: Phase 9 is stable, fully integrated with your architectural refactor
 
 ## **Phase 10: Interactive Editing & Exporting** (Est. 6-8 Hours)
 
-### 10.1 Drag-and-Drop Interaction �
-- [ ] Implement drag handlers on React Flow nodes for dependency creation.
-- [ ] Implement drag handlers on Gantt chart bars for date adjustments.
-- [ ] Implement dependency deletion (select edge + backspace).
-- [ ] Update `derivedGraph` state dynamically based on drag events.
+### 10.1 Drag-and-Drop Interaction 🟢
+- [x] **Graph Dependency Creation**: Implemented `onConnect` with high-visibility interactive handles. Dragging between nodes creates real dependencies in `rawData`.
+- [x] **Gantt Date Adjustments**: Implemented mouse-drag handlers on Gantt bars to shift `startDate` and `endDate` via pixel-to-day conversion.
+- [x] **Dependency Deletion**: Integrated `onEdgesDelete` to allow removal of dependencies via GUI (Select + Delete key).
+- [x] **Persistent Layout Overrides**: Updated `LayoutAlgorithm` and `App.jsx` to store and respect manual node repositioning (drags stick).
 
-### 10.2 Data Export �
-- [ ] Create `ExportService.js` to serialize updated project state.
-- [ ] Implement CSV and Excel export functionality using `papaparse` and `xlsx`.
-- [ ] Add "Export Data" button to the Sidebar.
+🎮 New Interactive Features:
+Direct Dependency Editing (Graph):
 
-### 10.3 API Integrations (Research Phase) 🔴
-- [ ] Research Jira and MS Project API documentation.
-- [ ] Design abstract `ProjectManagementIntegration` interface.
+Drag-to-Connect: I've added high-visibility, teal-glowing handles to all nodes. You can now drag between them to create logical dependencies. This update writes directly to your rawData and persists.
+Visual Deletion: Select any logical dependency line and high-light it, then press Backspace or Delete. The dependency is instantly removed from the task's data structure.
+Timeline Manipulation (Gantt):
+
+Live Date Shifting: You can now grab any task bar in the Gantt chart and slide it across the timeline.
+Intelligent Snapping: As you drag, the system calculates the "Day Delta" based on your movement. Releasing the bar updates the startDate and endDate of that task in the master dataset.
+Sticky Layouts:
+
+Persistent Repositioning: If you drag a node in the Network view, it now stays where you put it. I've updated the Layout Algorithm to respect manual user overrides, so your custom organization is preserved even after drill-down toggles.
+Security & Best Practices:
+
+All interactions are wrapped in the high-performance Single Source of Truth model.
+No logs are written to the browser console; everything uses the centralized Logger tracing framework.
+
+🛠️ Changes:
+Code (App.jsx): Explicitly configured the deleteKeyCode prop in the React Flow component to support both ['Backspace', 'Delete']. This ensures a seamless experience across Windows, Mac, and different keyboard preferences.
+Implementation Plan: Updated the description in section 10.1 to reflect the use of the Delete key as the primary interaction for removing logical dependencies.
+
+### 10.2 Data Export 🟢
+- [x] **ExportService.js**: Created a dedicated service to serialize the `rawData` state into downloadable formats.
+- [x] **Cross-Format Support**: Implemented CSV export via `papaparse` and Excel (.xlsx) export via `xlsx`.
+- [x] **Sidebar Integration**: Integrated "Export Data" buttons into the Sidebar with appropriate icon triggers.
+
+📥 New Export Features:
+ExportService.js:
+I've built a centralized service in 
+
+src/utils/ExportService.js
+ that takes your active project data and converts it into standard business formats.
+CSV Export:
+Using papaparse, the system accurately flattens your current project state (including any drag-and-drop adjustments) into a clean CSV file.
+Excel (.xlsx) Export:
+Leveraging the xlsx library, you can now export your project data as a professional Excel workbook, making it ready for distribution to stakeholders.
+UI/UX Integration:
+New "Export Data" Section: I've added a dedicated section in the Sidebar with sleek, theme-aligned buttons for one-click downloading.
+Visual Consistency: The export buttons use the same design language as the View Mode toggles, maintaining a premium look and feel.
+📝 Technical Note:
+I've ensured casing consistency in the filenames and imports to satisfy the build system's strict requirements (ExportService.js).
+The system now serves as a full-circle tool: Import -> Visualize -> Edit -> Export.
+Phase 10.2 is now marked as Completed (🟢).
+
+The next step in the plan is Phase 10.3: API Integrations (Research Phase). Would you like me to begin the research on Jira and MS Project API documentation to prepare for the integration?
+
+### 10.3 API Integrations (Research Phase) �
+- [x] **API Research**: Conducted deep dive into Jira Cloud REST API (JQL-based issue search) and MS Project Online REST API (`TaskLinks` for dependencies).
+- [x] **Abstract Interface**: Created `PMIntegration.js` defining a standard `ProjectManagementIntegration` base class with skeleton implementations for `JiraIntegration` and `MSProjectIntegration`.
+- [x] **Standardization Layer**: Included `_standardize` interface to map external schemas (Jira Issues/Project Tasks) into the internal `Project-Flow` format.
+
+🔍 Research Summary:
+Jira Cloud REST API:
+
+Data Fetching: Primarily uses the /rest/api/3/search endpoint combined with JQL (Jira Query Language) to pull project issues.
+Dependencies: Handled through "Issue Links". Our integration will need to map these link types (e.g., "blocks", "is blocked by") into direction-aware edges.
+Custom Fields: Progress and Dates often reside in custom fields, requiring our Standardization Layer to handle flexible mapping.
+MS Project Online REST API:
+
+Structural Fidelity: Uses /_api/ProjectServer with dedicated Tasks and TaskLinks endpoints.
+Native Dependencies: Very closely matches our internal model. TaskLinks provides DependencyType (FS, SS, etc.) and Lag data, which we can eventually use for advanced Gantt logic.
+🏗️ Architectural Foundation:
+I have created 
+
+src/utils/PMIntegration.js
+, which implements the Adapter Design Pattern:
+
+
+ProjectManagementIntegration
+ (Abstract Class): Defines the strict contract (
+
+authenticate
+, 
+
+fetchProjects
+, 
+
+fetchProjectData
+) that all future integrations must follow.
+Skeleton Implementations: Provided baseline classes for both 
+
+JiraIntegration
+ and 
+
+MSProjectIntegration
+, ready for API-key integration.
+Standardization Layer: Included a blueprint for mapping external tool schemas into the Project-Flow unified data format, ensuring that "Imported" data works perfectly with our Network and Gantt views.
+Phase 10.3 is now marked as Completed (🟢).
+
+The core requirements for Phase 10 are now finished. We have achieved:
+
+Drag-and-Drop editing.
+Full Export to CSV/Excel.
+Architectural Readiness for Enterprise API connections.
+What is our next objective? Would you like to refine any of these interactions, or move toward final polish and deployment?
+### 10.4 Architectural Review — Completed 🟢
+- [x] **SOLID Audit**: Verified that all core utilities (`VisibilityManager`, `LayoutAlgorithm`, `ExportService`) follow Single Responsibility.
+- [x] **DRY Implementation**: Consolidated repetitive mapping and math logic into centralized helpers.
+- [x] **Centralized Tracing**: Verified `logger.startTrace` implementation across all high-level components and services, ensuring unified debuggability.
+- [x] **Documentation Sync**: Updated `README.md` and `USER_GUIDE.md` to reflect the latest enterprise-standard architecture.
 
 ---
 
 ## **Phase 11: Resource & Workload Management** (Est. 3-5 Hours)
-- [ ] Phase level requirements pending �
+*Design Principle: Use **SOLID Pattern** to extend `VisibilityManager` for resource filtering. Ensure **DRY logic** for daily delta calculations.*
 
-### 11.1 Resource Heatmap �
-- [ ] Create `ResourceHeatmap.jsx` component.
-- [ ] Calculate daily workloads per assignee based on task durations and start dates.
-- [ ] Visualize over-allocated team members with color-coded alerts.
+### 11.1 Resource Heatmap 🔴
+- [ ] Create `ResourceHeatmap.jsx` (Follows data-driven render pattern).
+- [ ] Implement central logic to calculate daily workloads (Reuses existing `projectDataProcessor` date math).
+- [ ] Integrate **Centralized Tracing** for heatmap rendering and calculation cycles.
 
-### 11.2 Assignee Filtering �
+### 11.2 Assignee Filtering 🔴
 - [ ] Add "Assignee" dropdown to Sidebar or Header.
 - [ ] Update `VisibilityManager` to filter nodes/tasks based on selected assignee.
 - [ ] Ensure Gantt chart and Graph both respect assignee filters.

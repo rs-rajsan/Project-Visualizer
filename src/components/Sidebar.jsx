@@ -1,8 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download } from 'lucide-react';
 import { logger } from '../utils/logger';
 
-const Sidebar = ({ onFileUpload, viewMode, setViewMode }) => {
+const Sidebar = ({ onFileUpload, viewMode, setViewMode, onExportCSV, onExportExcel }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -130,6 +130,28 @@ const Sidebar = ({ onFileUpload, viewMode, setViewMode }) => {
                         >
                             <List className="w-4 h-4" />
                             Gantt
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-8">
+                    <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
+                        Export Data
+                    </h2>
+                    <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <button
+                            onClick={onExportCSV}
+                            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all text-slate-400 hover:text-indigo-300 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/30"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                            CSV
+                        </button>
+                        <button
+                            onClick={onExportExcel}
+                            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold rounded-md transition-all text-slate-400 hover:text-teal-300 hover:bg-teal-500/10 border border-transparent hover:border-teal-500/30"
+                        >
+                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                            Excel
                         </button>
                     </div>
                 </div>
