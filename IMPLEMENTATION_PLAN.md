@@ -151,7 +151,7 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 
 - [x] Modify `projectDataProcessor.js` to accept secondary "Baseline" historical uploads.
 - [x] Render shadow SVG elements mimicking original baseline bounds.
-- [ ] Implement volatile "Sandbox Mode" for active impact analysis isolated from master state.
+- [x] Implement volatile "Sandbox Mode" for active impact analysis isolated from master state.
 - [ ] Implement boolean status chip filtering ("Overdue", "At Risk").
 
 ---

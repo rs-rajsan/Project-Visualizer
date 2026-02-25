@@ -45,6 +45,11 @@ const App = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [isProcessing, setIsProcessing] = useState(false);
   const [rawData, setRawData] = useState([]);
+  const [sandboxData, setSandboxData] = useState([]);
+  const [isSandboxMode, setIsSandboxMode] = useState(false);
+
+  // The active visual state depends on sandbox toggle
+  const activeData = isSandboxMode ? sandboxData : rawData;
 
   // Phase 3: Derived State Engine
   const [drillState, setDrillState] = useState({
@@ -138,6 +143,8 @@ const App = () => {
     try {
       const processed = await ProjectDataProcessor.processFile(file);
       setRawData(processed.rawData);
+      setIsSandboxMode(false);
+      setSandboxData([]);
 
       // Initial Load: All collapsed
       const newDrillState = { expandedPhases: new Set(), expandedMilestones: new Set() };
@@ -160,8 +167,13 @@ const App = () => {
     setIsProcessing(true);
 
     try {
-      const updatedRawData = await ProjectDataProcessor.processBaselineFile(file, rawData);
-      setRawData(updatedRawData);
+      const updatedRawData = await ProjectDataProcessor.processBaselineFile(file, activeData);
+
+      if (isSandboxMode) {
+        setSandboxData(updatedRawData);
+      } else {
+        setRawData(updatedRawData);
+      }
 
       // Re-render graph while keeping drill state
       setDrillState(prev => {
@@ -175,13 +187,13 @@ const App = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [rawData, selectedTaskId, renderGraph]);
+  }, [activeData, isSandboxMode, selectedTaskId, renderGraph]);
 
   const handleNodeClick = useCallback((event, node) => {
     if (node.data.nodeType === 'task') {
       setSelectedTaskId(prev => {
         const newSelected = prev === node.id ? null : node.id;
-        renderGraph(rawData, drillState, newSelected);
+        renderGraph(activeData, drillState, newSelected);
         return newSelected;
       });
       return;
@@ -211,14 +223,15 @@ const App = () => {
         }
       }
 
-      renderGraph(rawData, newState, selectedTaskId);
+      renderGraph(activeData, newState, selectedTaskId);
       return newState;
     });
-  }, [rawData, drillState, selectedTaskId, renderGraph]);
+  }, [activeData, drillState, selectedTaskId, renderGraph]);
 
   const onConnect = useCallback((params) => {
     logger.info('Creating new dependency', params);
-    setRawData(prev => {
+    const targetDataSetter = isSandboxMode ? setSandboxData : setRawData;
+    targetDataSetter(prev => {
       const newData = [...prev];
       // Target task is the one receiving the connection
       const targetTask = newData.find(t => String(t.id) === params.target);
@@ -234,11 +247,12 @@ const App = () => {
       setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
       return newData;
     });
-  }, [drillState, selectedTaskId, renderGraph]);
+  }, [drillState, selectedTaskId, isSandboxMode, renderGraph]);
 
   const onEdgesDelete = useCallback((edgesToDelete) => {
     logger.info('Deleting edges', edgesToDelete);
-    setRawData(prev => {
+    const targetDataSetter = isSandboxMode ? setSandboxData : setRawData;
+    targetDataSetter(prev => {
       const newData = prev.map(task => {
         const newTask = { ...task };
         const logicalEdges = edgesToDelete.filter(e => e.id.startsWith('e-logic-'));
@@ -256,11 +270,12 @@ const App = () => {
       setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
       return newData;
     });
-  }, [drillState, selectedTaskId, renderGraph]);
+  }, [drillState, selectedTaskId, isSandboxMode, renderGraph]);
 
   const handleTaskUpdate = useCallback((taskId, dayDelta) => {
     logger.info(`Updating task ${taskId} by ${dayDelta} days`);
-    setRawData(prev => {
+    const targetDataSetter = isSandboxMode ? setSandboxData : setRawData;
+    targetDataSetter(prev => {
       const newData = prev.map(task => {
         if (String(task.id) === taskId) {
           const newTask = { ...task };
@@ -285,7 +300,7 @@ const App = () => {
       setTimeout(() => renderGraph(newData, drillState, selectedTaskId), 0);
       return newData;
     });
-  }, [drillState, selectedTaskId, renderGraph]);
+  }, [drillState, selectedTaskId, isSandboxMode, renderGraph]);
 
   const handleNodesChange = useCallback((changes) => {
     // Capture manual position changes
@@ -301,19 +316,19 @@ const App = () => {
   }, [onNodesChange]);
 
   const handleExportCSV = useCallback(() => {
-    ExportService.exportToCSV(rawData, 'project_data_export.csv');
-  }, [rawData]);
+    ExportService.exportToCSV(activeData, 'project_data_export.csv');
+  }, [activeData]);
 
   const handleExportExcel = useCallback(() => {
-    ExportService.exportToExcel(rawData, 'project_data_export.xlsx');
-  }, [rawData]);
+    ExportService.exportToExcel(activeData, 'project_data_export.xlsx');
+  }, [activeData]);
 
   const handlePaneClick = useCallback(() => {
     if (selectedTaskId) {
       setSelectedTaskId(null);
-      renderGraph(rawData, drillState, null);
+      renderGraph(activeData, drillState, null);
     }
-  }, [rawData, drillState, selectedTaskId, renderGraph]);
+  }, [activeData, drillState, selectedTaskId, renderGraph]);
 
   const handleNodeMouseEnter = useCallback((event, node) => {
     let path = '';
@@ -333,23 +348,23 @@ const App = () => {
 
   // React to Critical Path toggles automatically
   useEffect(() => {
-    if (rawData.length > 0) {
-      renderGraph(rawData, drillState, selectedTaskId, userPositions, assigneeFilter);
+    if (activeData.length > 0) {
+      renderGraph(activeData, drillState, selectedTaskId, userPositions, assigneeFilter);
     }
-  }, [rawData, drillState, selectedTaskId, showCriticalPath, assigneeFilter, userPositions, renderGraph]);
+  }, [activeData, drillState, selectedTaskId, showCriticalPath, assigneeFilter, userPositions, renderGraph]);
 
   const uniqueAssignees = useMemo(() => {
     const assignees = new Set();
-    rawData.forEach(task => {
+    activeData.forEach(task => {
       if (task.assignee) assignees.add(String(task.assignee).trim());
     });
     return Array.from(assignees).filter(Boolean).sort();
-  }, [rawData]);
+  }, [activeData]);
 
   const filteredData = useMemo(() => {
-    if (!assigneeFilter) return rawData;
-    return rawData.filter(t => String(t.assignee).trim() === assigneeFilter);
-  }, [rawData, assigneeFilter]);
+    if (!assigneeFilter) return activeData;
+    return activeData.filter(t => String(t.assignee).trim() === assigneeFilter);
+  }, [activeData, assigneeFilter]);
 
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans">
@@ -377,6 +392,27 @@ const App = () => {
           </h2>
 
           <div className="flex items-center gap-4">
+            {isSandboxMode && (
+              <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded">
+                Sandbox Active
+              </span>
+            )}
+            <button
+              onClick={() => {
+                if (!isSandboxMode) {
+                  setSandboxData(rawData.map(task => ({ ...task })));
+                  setIsSandboxMode(true);
+                } else {
+                  setIsSandboxMode(false);
+                  setSandboxData([]);
+                  renderGraph(rawData, drillState, selectedTaskId);
+                }
+              }}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${isSandboxMode ? 'bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:bg-amber-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+            >
+              {isSandboxMode ? 'Discard Changes' : 'Sandbox Mode'}
+            </button>
+
             <button
               onClick={() => setShowCriticalPath(prev => !prev)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${showCriticalPath ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
