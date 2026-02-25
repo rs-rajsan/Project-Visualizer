@@ -176,9 +176,40 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 
 ---
 
-## Phase 13: Enhanced AI Insights (Gemini Platform) 🔴
-**Goal:** Introduce Agentic AI for proactive structural optimization.
+## Phase 13: Advanced Enterprise Capabilities & Integrations 🔴
+**Goal:** Elevate the application from a visualization tool to an interactive, intelligent enterprise platform.
 
-- [ ] Interface `InsightsPanel.jsx` with Gemini Language Models executing graph heuristics.
-- [ ] Generate solid prompts targeting resource bottleneck prediction.
-- [ ] Implement direct UI Q&A contextualizing natural language ("How to shorten this timeline?") to Graph topological suggestions.
+### Sub-Phase 13.1: Live Integration Engine (Jira)
+- [ ] Connect `PMIntegration.js` to Jira APIs via robust OAuth2 flows.
+- [ ] Implement Live Sync functionality to dynamically pull tickets, dependencies, and assignee workloads.
+- [ ] Enable Bi-directional Sync allowing users to push Sandbox structural edits back to Jira via REST API.
+
+### Sub-Phase 13.2: Live Integration Engine (MS Project)
+- [ ] Connect `PMIntegration.js` to MS Project APIs via Azure AD / MS Graph.
+- [ ] Implement Live Sync functionality to dynamically pull tasks, links, and resource assignments.
+- [ ] Enable Bi-directional Sync allowing users to push Sandbox structural edits back to MS Project.
+
+### Sub-Phase 13.3: Issue & Ticket Tracking (ServiceNow Integration)
+- [ ] Connect to ServiceNow APIs to pull incident/problem tickets as project dependencies or risk nodes.
+- [ ] Map ServiceNow tickets to distinct node types with unique alerting visual states on the Gantt and Canvas.
+- [ ] Implement robust REST API handlers to live-query ticket status and automatically update visual progress.
+
+### Sub-Phase 13.4: AI Project Health Analyst (LLM Integration)
+- [ ] Interface the existing `InsightsPanel.jsx` with Gemini/OpenAI models executing graph heuristics.
+- [ ] Generate natural-language "Health Reports" based directly on structural and baseline deviations.
+- [ ] Implement predictive bottlenecks: AI-driven suggestions for specific resource reallocations to aggressively reduce Critical Path duration.
+
+### Sub-Phase 13.5: Advanced Graphical Analytics (Burn-down Metrics)
+- [ ] Integrate graphical libraries (e.g., Recharts) to populate the Velocity & Burn-down shell established in Phase 12.
+- [ ] Visualize timeline progression vs. mapped baseline expectations over time.
+- [ ] Synthesize cost curves representing aggregate daily cost burn rates to augment Executive Reporting exports.
+
+### Sub-Phase 13.6: Real-time Multiplayer Collaboration
+- [ ] Wire up WebSockets and CRDTs (Conflict-free Replicated Data Types, e.g., `yjs`) to support shared session states.
+- [ ] Allow multiple stakeholders (PMOs, Executives) to collaboratively view/edit the same Project Canvas simultaneously.
+- [ ] Display real-time UI cursors visualizing peer focus states (e.g. what nodes are being actively expanded/adjusted).
+
+### Sub-Phase 13.7: Enterprise Theming & Brand Exporting
+- [ ] Construct dynamic CSS/Theming engines permitting users to define specific Hex codes and brand palettes.
+- [ ] Allow injection of corporate logos.
+- [ ] Propagate branding vectors to the `html2canvas` module ensuring that all exported Executive PDFs inherently match the organization's corporate identity.
