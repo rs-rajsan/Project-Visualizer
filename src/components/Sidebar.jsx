@@ -35,7 +35,7 @@ const Sidebar = ({
         if (!file) return;
 
         // Start Request Trace for File Upload flow
-        const traceId = logger.startTrace({ action: 'file_upload', fileName: file.name, fileSize: file.size });
+        logger.startTrace({ action: 'file_upload', fileName: file.name, fileSize: file.size });
         logger.info(`Starting upload processing for file: ${file.name}`);
 
         try {

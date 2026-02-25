@@ -2,6 +2,7 @@
  * Abstract Base Class for Project Management Integrations
  * Defines the standard interface for connecting external tools like Jira or MS Project.
  */
+/* eslint-disable no-unused-vars */
 export class ProjectManagementIntegration {
     constructor(config = {}) {
         this.config = config;

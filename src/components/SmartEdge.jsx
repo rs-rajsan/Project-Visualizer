@@ -49,7 +49,7 @@ export default function SmartEdge({
         });
         return path;
 
-    }, [sourceX, sourceY, targetX, targetY, data]);
+    }, [sourceX, sourceY, targetX, targetY, data, sourcePosition, targetPosition]);
 
     // Interactive Focus State Logic
     const isActive = selected || data?.isHighlighted;

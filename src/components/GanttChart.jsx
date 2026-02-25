@@ -9,7 +9,7 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
 
     // 1. Process Data & Calculate Bounds
     const { items, minDate, maxDate } = useMemo(() => {
-        const traceId = logger.startTrace({ action: 'process_gantt_data', rowCount: data.length });
+        logger.startTrace({ action: 'process_gantt_data', rowCount: data.length });
         try {
             let earliest = new Date('2099-01-01').getTime();
             let latest = new Date('1970-01-01').getTime();
@@ -187,7 +187,7 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                     Task Name
                 </div>
                 <div className="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar">
-                    {items.map((item, i) => (
+                    {items.map((item) => (
                         <div
                             key={`${item.id}-list`}
                             className={clsx(
@@ -260,7 +260,7 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                         </div>
 
                         {/* Task Rows */}
-                        {items.map((item, i) => {
+                        {items.map((item) => {
                             const baselineStyles = getBaselineStyles(item);
 
                             // Check if overdue against baseline

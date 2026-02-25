@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { WorkloadManager } from '../utils/WorkloadManager';
-import { logger } from '../utils/logger';
 import clsx from 'clsx';
 import { User, AlertTriangle } from 'lucide-react';
 

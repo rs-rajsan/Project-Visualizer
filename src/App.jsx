@@ -70,7 +70,7 @@ const App = () => {
 
   // Core Render Flow using Derived State Pattern
   const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions, currentAssigneeFilter = assigneeFilter, currentStatusFilter = statusFilter) => {
-    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId, filter: currentAssigneeFilter, status: currentStatusFilter });
+    logger.startTrace({ action: 'render_graph', activeTaskId, filter: currentAssigneeFilter, status: currentStatusFilter });
 
     try {
       let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState, { assignee: currentAssigneeFilter, status: currentStatusFilter });
@@ -106,7 +106,6 @@ const App = () => {
         const edgeColor = isCritical ? '#f43f5e' : '#2dd4bf'; // Neon Rose for CPM, Teal for Trace
 
         layoutedNodes = layoutedNodes.map(n => {
-          const isTask = n.data.nodeType === 'task';
           const isHighlighted = activeNodes.has(n.id);
           const opacity = isHighlighted ? 1 : 0.2;
 
@@ -139,7 +138,7 @@ const App = () => {
     } finally {
       logger.endTrace();
     }
-  }, [setNodes, setEdges, showCriticalPath, drillState, userPositions, assigneeFilter, statusFilter]);
+  }, [setNodes, setEdges, showCriticalPath, userPositions, assigneeFilter, statusFilter]);
 
   const handleFileUpload = useCallback(async (file) => {
     logger.info(`App component received file: ${file.name}`);

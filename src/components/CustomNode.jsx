@@ -15,7 +15,6 @@ const CustomNode = ({ data, selected }) => {
     // Medium: 0.4 - 0.8
     // Large: > 0.8
     const isTiny = zoom < 0.4;
-    const isLarge = zoom > 0.8;
 
     // Determine if task is delayed versus baseline
     let isDelayed = false;

@@ -1,3 +1,4 @@
+/* global process */
 import log from 'loglevel';
 import { v4 as uuidv4 } from 'uuid';
 

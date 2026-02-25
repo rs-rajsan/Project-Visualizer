@@ -78,7 +78,6 @@ export class LayoutAlgorithm {
                 // This applies to logical edges (e-logic-*) between tasks/milestones in the same group.
                 const sameMilestone = sourceNode.data.milestone === targetNode.data.milestone &&
                     sourceNode.data.phase === targetNode.data.phase;
-                const samePhase = sourceNode.data.phase === targetNode.data.phase;
 
                 // Define semantic colors based on User Suggestions
                 const COLORS = {

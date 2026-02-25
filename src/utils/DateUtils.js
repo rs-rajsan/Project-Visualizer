@@ -1,5 +1,3 @@
-import { logger } from './logger';
-
 export class DateUtils {
     /**
      * Parse a date string into a Date object.

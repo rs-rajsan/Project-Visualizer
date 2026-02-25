@@ -98,7 +98,7 @@ export class VisibilityManager {
                 }
 
                 if (isPhaseExpanded) {
-                    Object.values(phase.milestones).forEach((milestone, mIndex) => {
+                    Object.values(phase.milestones).forEach((milestone) => {
                         const isMilestoneExpanded = drillState.expandedMilestones.has(milestone.name);
 
                         // Add Milestone Node
