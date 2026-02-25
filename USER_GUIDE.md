@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to **Project-Flow Visualizer**, a next-generation, enterprise-grade project visualization engine. Project-Flow transforms raw, tabular project data (CSV/Excel) into highly interactive, synchronized visual representations. 
+Welcome to **Project-Flow Visualizer**, a next-generation, enterprise-grade project visualization engine. Project-Flow transforms raw, tabular project data (CSV/Excel) and Microsoft Project exports (XML) into highly interactive, synchronized visual representations. 
 
 Designed with a focus on **Level of Detail (LOD)**, **Resource Workload Management**, and **Interactive Editing**, this tool empowers Project Managers to intuitively navigate, edit, and optimize complex workflows in real-time.
 
@@ -14,13 +14,13 @@ Designed with a focus on **Level of Detail (LOD)**, **Resource Workload Manageme
 2. **Interactive Gantt Chart**: A timeline-driven view supporting drag-and-drop schedule manipulation.
 3. **Resource Heatmap matrix**: Real-time capacity planning and over-allocation detection.
 4. **Universal State Sync**: Edits, filters, or expansions applied in one view instantly propagate across the entire application.
-5. **Bidirectional Data Flow**: Import via CSV/XLSX, visually edit the project, and export the exact state back to standard formats.
+5. **Bidirectional Data Flow**: Import via CSV/XLSX/XML, visually edit the project, and export the exact state back to standard formats.
 
 ---
 
 ## 📅 Data Schema Requirements
 
-Before importing, ensure your `.csv`, `.xls`, or `.xlsx` files align with standard project schemas. The parsing engine uses **fuzzy-matching** for resilience, but standardizing your headers is highly recommended.
+Before importing, ensure your `.csv`, `.xls`, `.xlsx`, or `.xml` (MS Project export) files align with standard project schemas. The parsing engine uses **fuzzy-matching** for resilience on tabular data, and parses MS Project XML hierarchy natively.
 
 ### Required Fields
 | Field Type      | Example Headers                 | Description |
@@ -88,3 +88,14 @@ Project-Flow relies on strict **SOLID/DRY principles**:
 
 ---
 *Generated internally for Project-Flow Visualizer Operations.*
+
+JIRA Integration:
+
+Jira Sync Button: I located the "Sync with Jira" button in the left sidebar under the "Compare Baseline" button. It is styled with an indigo border and background as expected.
+Modal Functionality:
+Trigger: Clicking the "Sync with Jira" button successfully triggered the "Jira Enterprise Sync" modal.
+Input Fields: I verified that the modal contains the required fields:
+Jira Domain URL (with placeholder https://your-domain.atlassian.net)
+Account Email (with placeholder user@company.com)
+API Token (with placeholder Paste your Jira API Token)
+Dismissal: I clicked the 'X' button in the top-right corner of the modal, and it dismissed correctly, returning the UI to its previous state.

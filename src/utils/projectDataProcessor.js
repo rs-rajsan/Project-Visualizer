@@ -115,6 +115,144 @@ export class ProjectDataProcessor {
     }
 
     /**
+     * Parse MS Project XML export
+     */
+    static async _parseMSProjectXML(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, "text/xml");
+
+                    // Basic validation
+                    const projectNode = xmlDoc.querySelector("Project");
+                    if (!projectNode) {
+                        throw new Error("Invalid MS Project XML structure.");
+                    }
+
+                    const rawData = [];
+                    // Tasks
+                    const tasks = xmlDoc.querySelectorAll("Project > Tasks > Task");
+                    if (!tasks || tasks.length === 0) {
+                        logger.warn("No tasks found in XML export.", { fileName: file.name });
+                        resolve([]);
+                        return;
+                    }
+
+                    // For Assignees mapping (Resource UID -> Name)
+                    const resources = xmlDoc.querySelectorAll("Project > Resources > Resource");
+                    const resourceMap = new Map();
+                    resources.forEach(res => {
+                        const uid = res.querySelector("UID")?.textContent;
+                        const name = res.querySelector("Name")?.textContent;
+                        if (uid && name) {
+                            resourceMap.set(uid, name);
+                        }
+                    });
+
+                    // For Assignments (Task UID -> Resource UID)
+                    const assignments = xmlDoc.querySelectorAll("Project > Assignments > Assignment");
+                    const assignmentMap = new Map(); // Task UID -> array of Resource Names
+                    assignments.forEach(assn => {
+                        const taskUID = assn.querySelector("TaskUID")?.textContent;
+                        const resUID = assn.querySelector("ResourceUID")?.textContent;
+                        if (taskUID && resUID && resourceMap.has(resUID)) {
+                            if (!assignmentMap.has(taskUID)) assignmentMap.set(taskUID, []);
+                            assignmentMap.get(taskUID).push(resourceMap.get(resUID));
+                        }
+                    });
+
+                    // We need to establish phases and milestones based on Outline levels
+                    // We will do a generic pass to build the rawData list
+                    tasks.forEach(task => {
+                        const outlineLevel = task.querySelector("OutlineLevel")?.textContent;
+                        // Skip root project summary task, usually OutlineLevel 0
+                        if (!outlineLevel || outlineLevel === "0") return;
+
+                        const uid = task.querySelector("UID")?.textContent;
+                        const defaultId = task.querySelector("ID")?.textContent;
+                        const name = task.querySelector("Name")?.textContent;
+                        if (!name) return; // Ignore empty rows
+
+                        const start = task.querySelector("Start")?.textContent; // format: 2023-10-25T08:00:00
+                        const finish = task.querySelector("Finish")?.textContent;
+                        const startFormat = start ? start.split('T')[0] : '';
+                        const finishFormat = finish ? finish.split('T')[0] : '';
+
+                        const isMilestone = task.querySelector("Milestone")?.textContent === "1";
+                        const isSummary = task.querySelector("Summary")?.textContent === "1";
+
+                        // Dependencies (PredecessorLinks)
+                        const predLinks = task.querySelectorAll("PredecessorLink");
+                        const dependencies = [];
+                        predLinks.forEach(link => {
+                            const predUID = link.querySelector("PredecessorUID")?.textContent;
+                            if (predUID) dependencies.push(predUID);
+                        });
+
+                        const taskAssignees = assignmentMap.get(uid) || [];
+
+                        rawData.push({
+                            id: uid || defaultId, // Prefer UID
+                            name: name,
+                            phase: isSummary ? name : 'General', // Fallback, we'll refine this
+                            milestone: isMilestone ? name : '',
+                            dependencies: dependencies.join(','),
+                            startDate: startFormat,
+                            endDate: finishFormat,
+                            assignee: taskAssignees.join(', '),
+                            percentComplete: task.querySelector("PercentComplete")?.textContent || '0',
+                            isSummary: isSummary,
+                            outlineLevel: outlineLevel
+                        });
+                    });
+
+                    // Post-processing: Apply correct Phases based on outline parent structure
+                    const outlineStack = [];
+                    rawData.forEach(task => {
+                        const level = parseInt(task.outlineLevel, 10);
+
+                        // Keep stack aligned with current level
+                        while (outlineStack.length > 0 && outlineStack[outlineStack.length - 1].level >= level) {
+                            outlineStack.pop();
+                        }
+
+                        if (task.isSummary) {
+                            outlineStack.push({ level: level, name: task.name });
+                        }
+
+                        // Determine phase based on top-level summary task (Level 1)
+                        const phaseSummary = outlineStack.find(s => s.level === 1);
+                        if (phaseSummary) {
+                            task.phase = phaseSummary.name;
+                        } else if (!task.isSummary) {
+                            task.phase = "General Tasks";
+                        }
+                    });
+
+                    // Remove Summary tasks from final dataset (they are structural in MS Project)
+                    // If we removed them, we'd lose connection if tasks depend on a phase. So we keep them,
+                    // but they acts as 'tasks' in our system right now. If we drop them, we need to map their IDs
+                    // Currently, let's keep them and rely on standard processing. Our Gantt groups by Phase automatically.
+                    // Wait, if we keep them, they draw as tasks. Better to remove them if they are just grouping folders.
+                    const finalData = rawData.filter(t => !t.isSummary);
+
+                    logger.info(`Successfully parsed MS Project XML: ${finalData.length} tasks extracted.`);
+                    resolve(finalData);
+
+                } catch (error) {
+                    logger.error("Failed to parse MS Project XML", error);
+                    reject(error);
+                }
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsText(file);
+        });
+    }
+
+    /**
      * Process a file (CSV/Excel) and extract React Flow nodes and edges
      * @param {File} file 
      */
@@ -127,8 +265,10 @@ export class ProjectDataProcessor {
                 rawData = await this._parseCSV(file);
             } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
                 rawData = await this._parseExcel(file);
+            } else if (file.name.endsWith('.xml')) {
+                rawData = await this._parseMSProjectXML(file);
             } else {
-                throw new Error("Unsupported file format. Please upload CSV or Excel.");
+                throw new Error("Unsupported file format. Please upload CSV, Excel, or MS Project XML.");
             }
 
             const standardizedData = this._standardizeData(rawData);
@@ -158,6 +298,8 @@ export class ProjectDataProcessor {
                 baselineRaw = await this._parseCSV(file);
             } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
                 baselineRaw = await this._parseExcel(file);
+            } else if (file.name.endsWith('.xml')) {
+                baselineRaw = await this._parseMSProjectXML(file);
             } else {
                 throw new Error("Unsupported file format for baseline.");
             }

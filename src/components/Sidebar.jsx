@@ -120,7 +120,7 @@ const Sidebar = ({
                         type="file"
                         ref={fileInputRef}
                         className="hidden"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xml, application/xml, text/xml"
                         onChange={handleFileSelect}
                     />
                     <div className="p-3 bg-slate-800 rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg">
@@ -130,7 +130,7 @@ const Sidebar = ({
                         {isDragging ? 'Drop file to upload' : 'Click or Drag & Drop'}
                     </p>
                     <p className="text-xs text-slate-400">
-                        CSV, XLSX, or XLS
+                        CSV, XLSX, XLS, or XML
                     </p>
                 </div>
 
@@ -140,7 +140,7 @@ const Sidebar = ({
                         type="file"
                         ref={baselineInputRef}
                         className="hidden"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xml, application/xml, text/xml"
                         onChange={handleBaselineSelect}
                     />
                     <button
