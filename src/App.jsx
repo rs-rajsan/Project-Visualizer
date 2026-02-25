@@ -14,6 +14,7 @@ import SmartEdge from './components/SmartEdge';
 import { GanttChart } from './components/GanttChart';
 import { ResourceHeatmap } from './components/ResourceHeatmap';
 import { Dashboard } from './components/Dashboard';
+import { JiraConfigModal } from './components/JiraConfigModal';
 import { logger } from './utils/logger';
 import { Maximize } from 'lucide-react';
 import { ProjectDataProcessor } from './utils/projectDataProcessor';
@@ -66,6 +67,7 @@ const App = () => {
   const [assigneeFilter, setAssigneeFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isJiraModalOpen, setIsJiraModalOpen] = useState(false);
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
@@ -164,6 +166,21 @@ const App = () => {
     } finally {
       setIsProcessing(false);
     }
+  }, [renderGraph]);
+
+  const handleJiraImport = useCallback((importedData) => {
+    logger.info(`App component received Jira imported data: ${importedData.length} items`);
+    setRawData(importedData);
+    setIsSandboxMode(false);
+    setSandboxData([]);
+
+    const newDrillState = { expandedPhases: new Set(), expandedMilestones: new Set() };
+    setDrillState(newDrillState);
+    setSelectedTaskId(null);
+    setActiveBreadcrumb('Canvas View (Jira Sync)');
+
+    renderGraph(importedData, newDrillState, null);
+    logger.info('Jira data processed and valid phase graph rendered');
   }, [renderGraph]);
 
   const handleBaselineUpload = useCallback(async (file) => {
@@ -409,11 +426,17 @@ const App = () => {
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           onBaselineUpload={handleBaselineUpload}
+          onOpenJira={() => setIsJiraModalOpen(true)}
         />
       )}
 
       {/* Main Canvas Area */}
       <div className="flex-1 relative h-full w-full">
+        <JiraConfigModal
+          isOpen={isJiraModalOpen}
+          onClose={() => setIsJiraModalOpen(false)}
+          onImport={handleJiraImport}
+        />
         {/* Header / Breadcrumb Placeholder */}
         {!isFullscreen && (
           <header className="absolute top-0 left-0 w-full h-14 bg-slate-900/80 backdrop-blur border-b border-slate-800 z-10 flex items-center justify-between px-6">

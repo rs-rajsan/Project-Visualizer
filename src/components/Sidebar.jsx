@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock, BarChart3 } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock, BarChart3, Server } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 const Sidebar = ({
@@ -13,7 +13,8 @@ const Sidebar = ({
     onAssigneeFilter,
     onBaselineUpload,
     statusFilter = null,
-    setStatusFilter
+    setStatusFilter,
+    onOpenJira
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
@@ -149,6 +150,15 @@ const Sidebar = ({
                     >
                         <FileSpreadsheet className="w-3 h-3" />
                         Compare Baseline
+                    </button>
+
+                    <button
+                        onClick={onOpenJira}
+                        className="w-full mt-2 text-[10px] uppercase tracking-wider font-semibold text-indigo-400 hover:text-indigo-300 py-1.5 px-2 rounded border border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/10 hover:bg-indigo-500/20 transition-all text-center flex items-center justify-center gap-1.5"
+                        title="Live sync with enterprise Jira boards"
+                    >
+                        <Server className="w-3 h-3" />
+                        Sync with Jira
                     </button>
                 </div>
 
