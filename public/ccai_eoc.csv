@@ -1,0 +1,59 @@
+Task ID,Phase,Milestone,Task,Duration (Days),Start Date,End Date,Dependencies,Percent Complete,Owner,Tools Used,Status
+1,Initiation,Project Kickoff,Project Charter & Governance Setup,10,2026-03-01,2026-03-10,,0,Project Manager,"MS Project, Confluence",Not Started
+1.1,Initiation,Project Kickoff,Stakeholder Identification & Communication Plan,7,2026-03-03,2026-03-09,1.0,0,Project Manager,"Stakeholder Matrix, MS Teams",Not Started
+1.2,Initiation,Project Kickoff,Vendor Selection & Contract Finalization,15,2026-03-01,2026-03-15,,0,Procurement Lead,Contract Management System,Not Started
+1.3,Initiation,Project Kickoff,Team Assembly & Role Assignment,10,2026-03-10,2026-03-19,1.0,0,Project Manager,"RACI Matrix, Org Charts",Not Started
+2,Discovery & Planning,Requirements Complete,Current State Assessment - Contact Center,20,2026-03-20,2026-04-08,1.3,0,Business Analyst,"Process Mining Tools, Interviews",Not Started
+2.1,Discovery & Planning,Requirements Complete,Current State Assessment - IT Infrastructure,15,2026-03-20,2026-04-03,1.3,0,IT Architect,"Network Diagrams, CMDB",Not Started
+2.2,Discovery & Planning,Requirements Complete,EOC Use Case Definition & Requirements,25,2026-04-04,2026-04-28,2.0,0,Business Analyst,"Jira, Confluence, Miro",Not Started
+2.3,Discovery & Planning,Requirements Complete,"Emergency Scenario Mapping (Outages, Storms)",15,2026-04-09,2026-04-23,2.0,0,Operations SME,"Process Flowcharts, User Stories",Not Started
+2.4,Discovery & Planning,Requirements Complete,AI/NLP Model Requirements Definition,20,2026-04-24,2026-05-13,"2.2,2.3",0,Data Scientist,"ML Canvas, Intent Taxonomy",Not Started
+2.5,Discovery & Planning,Requirements Complete,"Integration Requirements (CRM, OMS, GIS, KB)",20,2026-04-29,2026-05-18,"2.1,2.2",0,Integration Architect,"API Documentation, Integration Matrix",Not Started
+2.6,Discovery & Planning,Requirements Complete,Security & Compliance Assessment,15,2026-05-01,2026-05-15,2.1,0,Cybersecurity Lead,"Security Frameworks, Risk Assessment",Not Started
+2.7,Discovery & Planning,Requirements Complete,Cloud Platform Selection (AWS/Azure/GCP),10,2026-05-14,2026-05-23,"2.1,2.5",0,Cloud Architect,"TCO Calculator, Platform Comparison",Not Started
+3,Design,Design Approval,CCAI Platform Architecture Design,25,2026-05-19,2026-06-12,"2.5,2.7",0,Solution Architect,"Lucidchart, Architecture Diagrams",Not Started
+3.1,Design,Design Approval,Virtual Agent Conversational Flow Design,30,2026-05-24,2026-06-22,2.4,0,Conversation Designer,"Dialogflow, Design Tools",Not Started
+3.2,Design,Design Approval,Agent Assist Knowledge Base Design,25,2026-05-24,2026-06-17,2.4,0,Knowledge Engineer,Knowledge Graph Tools,Not Started
+3.3,Design,Design Approval,Real-Time Analytics Dashboard Design,20,2026-06-13,2026-07-02,3.0,0,Data Analyst,"Tableau, Looker, PowerBI",Not Started
+3.4,Design,Design Approval,Intent Model & NLP Training Data Strategy,30,2026-06-18,2026-07-17,"2.4,3.1",0,NLP Engineer,"Training Dataset Tools, Annotation",Not Started
+3.5,Design,Design Approval,"API Integration Design (CRM, OMS, GIS)",25,2026-06-23,2026-07-17,"2.5,3.0",0,Integration Architect,"Postman, Swagger, API Gateway",Not Started
+3.6,Design,Design Approval,Failover & Business Continuity Design,15,2026-07-03,2026-07-17,3.0,0,Resilience Architect,"DR Planning Tools, Runbooks",Not Started
+3.7,Design,Design Approval,Technical Design Document (TDD) Review,10,2026-07-18,2026-07-27,"3.0,3.1,3.2,3.3,3.4,3.5,3.6",0,Project Manager,"Document Review, Sign-off Matrix",Not Started
+4,Development & Configuration,Dev Environment Ready,Cloud Environment Provisioning,15,2026-07-28,2026-08-11,3.7,0,Cloud Engineer,"Terraform, CloudFormation, Azure ARM",Not Started
+4.1,Development & Configuration,Dev Environment Ready,CCAI Platform Installation & Configuration,20,2026-08-12,2026-08-31,4.0,0,Platform Engineer,"CCAI Platform, Console",Not Started
+4.2,Development & Configuration,Dev Environment Ready,Virtual Agent Development - Intent Training,40,2026-09-01,2026-10-10,"3.1,4.1",0,NLP Engineer,"Dialogflow CX, Training Console",Not Started
+4.3,Development & Configuration,Dev Environment Ready,Agent Assist Configuration & KB Integration,35,2026-09-01,2026-10-05,"3.2,4.1",0,Knowledge Engineer,"Agent Assist Console, Knowledge Base",Not Started
+4.4,Development & Configuration,Dev Environment Ready,Call Transcription Service Configuration,15,2026-09-15,2026-09-29,4.1,0,Platform Engineer,"Speech-to-Text APIs, Transcription Tools",Not Started
+4.5,Development & Configuration,Integrations Complete,CRM Integration Development & Testing,30,2026-10-06,2026-11-04,"3.5,4.1",0,Integration Developer,"APIs, Webhooks, Middleware",Not Started
+4.6,Development & Configuration,Integrations Complete,OMS Integration Development & Testing,30,2026-10-06,2026-11-04,"3.5,4.1",0,Integration Developer,"APIs, ESB, Message Queues",Not Started
+4.7,Development & Configuration,Integrations Complete,GIS Platform Integration Development,25,2026-10-11,2026-11-04,"3.5,4.1",0,Integration Developer,"GIS APIs, Mapping Services",Not Started
+4.8,Development & Configuration,Analytics Ready,Real-Time Analytics Dashboard Development,35,2026-10-11,2026-11-14,"3.3,4.1",0,BI Developer,"Looker, Tableau, PowerBI, BigQuery",Not Started
+4.9,Development & Configuration,Analytics Ready,Call Driver & Volume Analytics Configuration,20,2026-11-05,2026-11-24,4.8,0,Data Analyst,"Analytics Platform, SQL",Not Started
+5,Testing,UAT Complete,Unit Testing - Virtual Agent,20,2026-10-11,2026-10-30,4.2,0,QA Engineer,"Test Scripts, Dialogflow Simulator",Not Started
+5.1,Testing,UAT Complete,Integration Testing - End-to-End Flows,30,2026-11-05,2026-12-04,"4.5,4.6,4.7",0,QA Lead,"Test Management Tools, Postman",Not Started
+5.2,Testing,UAT Complete,Performance & Load Testing,20,2026-11-15,2026-12-04,"4.2,5.1",0,Performance Engineer,"JMeter, LoadRunner, Cloud Load Testing",Not Started
+5.3,Testing,UAT Complete,Security & Penetration Testing,15,2026-11-25,2026-12-09,5.1,0,Security Engineer,"Security Testing Tools, Vulnerability Scanners",Not Started
+5.4,Testing,UAT Complete,UAT Planning & Test Case Development,15,2026-11-15,2026-11-29,5.0,0,Business Analyst,"Test Case Templates, UAT Plans",Not Started
+5.5,Testing,UAT Complete,UAT Execution - Contact Center Agents,25,2026-12-05,2026-12-29,"5.4,5.1",0,UAT Coordinator,"UAT Environment, Defect Tracking",Not Started
+5.6,Testing,UAT Complete,UAT Execution - EOC Leadership,20,2026-12-10,2026-12-29,"5.4,5.1",0,UAT Coordinator,"UAT Environment, Feedback Forms",Not Started
+5.7,Testing,UAT Complete,Defect Resolution & Retesting,20,2026-12-15,2027-01-03,"5.5,5.6",0,Development Team,"Jira, Bug Tracking Tools",Not Started
+6,Training & Change Mgmt,Training Complete,Training Material Development,30,2026-11-25,2026-12-24,"4.2,4.3",0,Training Lead,"LMS, Video Recording Tools, Job Aids",Not Started
+6.1,Training & Change Mgmt,Training Complete,Agent Training - Virtual Agent & Agent Assist,20,2027-01-04,2027-01-23,6.0,0,Training Lead,"Training Platform, Hands-on Labs",Not Started
+6.2,Training & Change Mgmt,Training Complete,Supervisor Training - Analytics & Monitoring,15,2027-01-04,2027-01-18,6.0,0,Training Lead,"Training Platform, Dashboard Demos",Not Started
+6.3,Training & Change Mgmt,Training Complete,EOC Leadership Training - Emergency Workflows,10,2027-01-19,2027-01-28,6.0,0,Training Lead,"Executive Briefings, Scenario Walkthroughs",Not Started
+6.4,Training & Change Mgmt,Training Complete,Change Management Communication Campaign,60,2026-12-01,2027-01-29,6.0,0,Change Manager,"Email, Intranet, Town Halls, Surveys",Not Started
+6.5,Training & Change Mgmt,Training Complete,Training Effectiveness Assessment,10,2027-01-24,2027-02-02,"6.1,6.2,6.3",0,Training Lead,"Surveys, Competency Assessments",Not Started
+7,Deployment,Go-Live,Production Environment Provisioning,15,2027-01-04,2027-01-18,5.7,0,Cloud Engineer,"Cloud Consoles, IaC Scripts",Not Started
+7.1,Deployment,Go-Live,Production Deployment - CCAI Platform,10,2027-01-19,2027-01-28,7.0,0,DevOps Engineer,"CI/CD Pipelines, Deployment Scripts",Not Started
+7.2,Deployment,Go-Live,Production Cutover - Phased Rollout Plan,5,2027-01-29,2027-02-02,"7.1,6.1",0,Project Manager,"Cutover Checklist, Rollback Plan",Not Started
+7.3,Deployment,Go-Live,Go-Live Readiness Review,3,2027-02-03,2027-02-05,7.2,0,Steering Committee,"Readiness Checklist, Sign-off",Not Started
+7.4,Deployment,Go-Live,Production Go-Live,1,2027-02-06,2027-02-06,7.3,0,Project Manager,"War Room, Monitoring Tools",Not Started
+8,Hypercare & Optimization,Hypercare Complete,Hypercare Support - 24/7 Monitoring (30 days),30,2027-02-07,2027-03-08,7.4,0,Support Team,"Monitoring Dashboards, Incident Mgmt",Not Started
+8.1,Hypercare & Optimization,Hypercare Complete,Incident Response & Resolution,30,2027-02-07,2027-03-08,7.4,0,Support Team,"ServiceNow, PagerDuty, Runbooks",Not Started
+8.2,Hypercare & Optimization,Hypercare Complete,Performance Monitoring & Tuning,30,2027-02-07,2027-03-08,7.4,0,Performance Engineer,"APM Tools, Cloud Monitoring",Not Started
+8.3,Hypercare & Optimization,Hypercare Complete,NLP Model Optimization - Intent Refinement,45,2027-02-07,2027-03-23,7.4,0,NLP Engineer,"Training Console, Logs Analysis",Not Started
+8.4,Hypercare & Optimization,Hypercare Complete,User Feedback Collection & Analysis,30,2027-02-07,2027-03-08,7.4,0,Business Analyst,"Surveys, Feedback Forms, Analytics",Not Started
+8.5,Hypercare & Optimization,Project Closure,KPI Measurement & ROI Analysis,20,2027-03-09,2027-03-28,"8.0,8.1,8.2",0,Project Manager,"BI Tools, ROI Calculator",Not Started
+8.6,Hypercare & Optimization,Project Closure,Lessons Learned & Documentation,10,2027-03-24,2027-04-02,"8.3,8.4",0,Project Manager,"Confluence, SharePoint",Not Started
+8.7,Hypercare & Optimization,Project Closure,Project Closure & Transition to BAU,5,2027-04-03,2027-04-07,"8.5,8.6",0,Project Manager,"Closure Checklist, Handoff Documentation",Not Started
+8.8,Hypercare & Optimization,Project Closure,Final Steering Committee & Executive Briefing,3,2027-04-08,2027-04-10,8.7,0,Project Manager,"Executive Presentation, Final Report",Not Started

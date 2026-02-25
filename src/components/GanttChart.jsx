@@ -277,7 +277,7 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                                     {baselineStyles && (
                                         <div
                                             className={clsx(
-                                                "absolute top-1/2 -mt-4 h-2 rounded-sm opacity-50 pointer-events-none",
+                                                "absolute top-1/2 -mt-3.5 h-[3px] rounded-sm opacity-50 pointer-events-none",
                                                 item.type === 'phase' ? 'bg-indigo-300' :
                                                     item.type === 'milestone' ? 'bg-orange-300' :
                                                         'bg-slate-400'

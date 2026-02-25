@@ -142,11 +142,11 @@ const Sidebar = ({
                     />
                     <button
                         onClick={() => baselineInputRef.current?.click()}
-                        className="w-full text-xs font-medium bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg border border-slate-700 hover:border-slate-600 transition-all text-center flex items-center justify-center gap-2"
+                        className="w-full text-[10px] uppercase tracking-wider font-semibold text-slate-500 hover:text-slate-300 py-1.5 px-2 rounded border border-slate-800 hover:border-slate-600 bg-slate-900/50 hover:bg-slate-800 transition-all text-center flex items-center justify-center gap-1.5"
                         title="Upload a historical projection to compare against the current timeline."
                     >
-                        <FileSpreadsheet className="w-3.5 h-3.5" />
-                        Compare to Baseline
+                        <FileSpreadsheet className="w-3 h-3" />
+                        Compare Baseline
                     </button>
                 </div>
 
