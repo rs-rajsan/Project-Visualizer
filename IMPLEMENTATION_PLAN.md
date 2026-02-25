@@ -154,6 +154,12 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 - [x] Implement volatile "Sandbox Mode" for active impact analysis isolated from master state.
 - [x] Implement boolean status chip filtering ("Overdue", "At Risk").
 
+### What I Did & Developed
+* **Baseline Historical Data Import (`projectDataProcessor.js`)**: Developed a `processBaselineFile` method in the data mapping layer. You can now upload a secondary "Baseline" CSV or Excel file containing your original date projections. The system gracefully merges the `baselineStartDate` and `baselineEndDate` into the active `rawData` model.
+* **Visual Baseline Tracking (`GanttChart.jsx` & `App.jsx`)**: Added a minimalist `3px` grey shadow behind all Gantt bars signifying the baseline constraint. Mapped dynamic styling to alert the user; if a Task breaches the baseline boundary, its standard color scheme shifts to a pulsing rose-red warning.
+* **Volatile Sandbox Mode (`App.jsx`)**: Built an alternate `sandboxData` array state. Clicking the "Sandbox Mode" toggle instantly pipes the testing data array. Any manual edits or drags are isolated entirely from the `rawData` pool until "Discard Changes" wipes the sandbox.
+* **Status Chip Filtering (`Sidebar.jsx` & `VisibilityManager.js`)**: Engineered toggle filters isolating tasks based on their relative delay margins vs active baseline boundaries. "Overdue" (current finishing date natively > baseline finishing date) and "At Risk" (0 margin/buffer remaining).
+
 ---
 
 ## Phase 12: Executive Reporting 🔴
