@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { FileText, Clock, CheckCircle2, AlertCircle, Users, Download, Maximize, Loader2, BarChart3 } from 'lucide-react';
 import { DateUtils } from '../utils/DateUtils';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import pptxgen from "pptxgenjs";
 import { ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useTheme } from './ThemeProvider';
 
@@ -130,25 +131,115 @@ export const Dashboard = ({ data }) => {
     const handleExportPDF = async () => {
         if (!dashboardRef.current) return;
         setIsExporting(true);
+        console.log('Starting PDF Export...');
         try {
-            const canvas = await html2canvas(dashboardRef.current, {
-                scale: 2,
+            console.log('Calling toPng...');
+            const dataUrl = await toPng(dashboardRef.current, {
                 backgroundColor: '#0f172a', // Tailwind slate-950
-                ignoreElements: (element) => element.classList.contains('no-export')
+                pixelRatio: 2,
+                filter: (node) => !node.classList?.contains('no-export')
             });
+            console.log('toPng succeeded, length:', dataUrl?.length);
 
-            const imgData = canvas.toDataURL('image/png');
+            const width = dashboardRef.current.offsetWidth;
+            const height = dashboardRef.current.offsetHeight;
+
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'pt',
-                format: [canvas.width, canvas.height]
+                format: [width, height]
             });
 
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save('Executive_Dashboard_Report.pdf');
+            console.log('Adding image to PDF...');
+            pdf.addImage(dataUrl, 'PNG', 0, 0, width, height);
+            console.log('Saving PDF via standard browser Blob link...');
+
+            const pdfBlob = pdf.output('blob');
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Executive_Dashboard_Report.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            console.log('PDF saved.');
         } catch (error) {
             console.error("Failed to generate PDF snapshot:", error);
-            alert("Failed to export PDF layout.");
+            alert("Failed to export PDF layout: " + String(error.message || error));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleExportPPTX = async () => {
+        setIsExporting(true);
+        console.log('Starting PPTX Export...');
+        try {
+            // Initialize Presentation
+            let pres = new pptxgen();
+            pres.theme = { headFontFace: "Arial Light" };
+            const brandColor = themeConfig?.primaryColor?.replace('#', '') || '6366f1';
+
+            // Slide 1: Title
+            let slide1 = pres.addSlide();
+            slide1.background = { color: "0F172A" }; // slate-950
+            slide1.addText("Enterprise Project Abstract", {
+                x: 1, y: 2, w: "80%", h: 2,
+                fontSize: 44, color: "F8FAFC", bold: true, align: "center", fontFace: "Inter"
+            });
+            slide1.addText("Generated automatically by Project-Flow", {
+                x: 1, y: 3.5, w: "80%", h: 1,
+                fontSize: 16, color: "94A3B8", align: "center"
+            });
+            if (themeConfig?.logoUrl) {
+                slide1.addImage({ data: themeConfig.logoUrl, x: 4, y: 0.5, w: 2, h: 1, sizing: { type: "contain" } });
+            }
+
+            // Slide 2: High-Level Metrics
+            let slide2 = pres.addSlide();
+            slide2.background = { color: "0F172A" };
+            slide2.addText("Current Health Metrics", { x: 0.5, y: 0.5, w: "90%", fontSize: 24, color: brandColor, bold: true });
+
+            const cards = [
+                { title: "Total Tasks", val: metrics.total, x: 0.5 },
+                { title: "Active Resources", val: metrics.assigneeCount, x: 3.0 },
+                { title: "Tasks At Risk", val: metrics.atRisk, x: 5.5 },
+                { title: "Overdue Slippage", val: metrics.overdue, x: 8.0 }
+            ];
+
+            cards.forEach(c => {
+                slide2.addShape(pres.ShapeType.rect, { x: c.x, y: 1.5, w: 2.2, h: 1.5, fill: "1E293B", line: { pt: 1, color: "334155" } });
+                slide2.addText(c.title, { x: c.x, y: 1.6, w: 2.2, fontSize: 12, color: "94A3B8", align: "center", bold: true });
+                slide2.addText(String(c.val), { x: c.x, y: 2.1, w: 2.2, fontSize: 32, color: "F8FAFC", align: "center", bold: true });
+            });
+
+            // Need to capture charts if they exist
+            const burndownEl = document.getElementById('burndown-chart');
+            const scurveEl = document.getElementById('scurve-chart');
+
+            if (burndownEl && scurveEl) {
+                const burndownImg = await toPng(burndownEl, { backgroundColor: '#1e293b', pixelRatio: 2 });
+                const scurveImg = await toPng(scurveEl, { backgroundColor: '#1e293b', pixelRatio: 2 });
+
+                // Slide 3: Visual Analytics
+                let slide3 = pres.addSlide();
+                slide3.background = { color: "0F172A" };
+                slide3.addText("Agile Sprint Burn-down", { x: 0.5, y: 0.5, w: 4, fontSize: 18, color: "F8FAFC", bold: true });
+                slide3.addImage({ data: burndownImg, x: 0.5, y: 1.0, w: 4.5, h: 3 });
+
+                slide3.addText("Executive S-Curve", { x: 5.5, y: 0.5, w: 4, fontSize: 18, color: "F8FAFC", bold: true });
+                slide3.addImage({ data: scurveImg, x: 5.5, y: 1.0, w: 4.5, h: 3 });
+            }
+
+            console.log('Writing PPTX file...');
+            pres.writeFile({ fileName: "Executive_Dashboard_Briefing.pptx" });
+            console.log('PPTX saved.');
+
+        } catch (error) {
+            console.error("Failed to generate PPTX snapshot:", error);
+            alert("Failed to export PPTX layout: " + String(error.message || error));
         } finally {
             setIsExporting(false);
         }
@@ -172,14 +263,28 @@ export const Dashboard = ({ data }) => {
                     </p>
                 </div>
 
-                <button
-                    onClick={handleExportPDF}
-                    disabled={isExporting}
-                    className="no-export flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                    {isExporting ? 'Generating...' : 'Export Report'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleExportPPTX}
+                        disabled={isExporting}
+                        className="no-export flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Download PowerPoint Presentation"
+                    >
+                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart3 className="w-4 h-4" />}
+                        {isExporting ? 'Generating...' : 'Export PPTX'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleExportPDF}
+                        disabled={isExporting}
+                        className="no-export flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Download Detailed PDF"
+                    >
+                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        {isExporting ? 'Generating...' : 'Export PDF'}
+                    </button>
+                </div>
             </div>
 
             {/* Top Level KPIs */}
@@ -229,7 +334,7 @@ export const Dashboard = ({ data }) => {
                     <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-teal-500 to-indigo-400 left-0"></div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-1">Agile Sprint Burn-down</h3>
                     <p className="text-xs text-slate-400 mb-6">Task completion velocity: Actual remaining vs Ideal trajectory</p>
-                    <div className="flex-1 w-full h-full min-h-[250px]">
+                    <div id="burndown-chart" className="flex-1 w-full h-full min-h-[250px] bg-slate-800">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
@@ -261,7 +366,7 @@ export const Dashboard = ({ data }) => {
                         </div>
                     </div>
 
-                    <div className="flex-1 w-full h-full min-h-[250px]">
+                    <div id="scurve-chart" className="flex-1 w-full h-full min-h-[250px] bg-slate-800">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />

@@ -77,10 +77,12 @@ A high-density matrix visualizing team capacity over the project lifecycle.
 * **Data Export**: Click **CSV** or **Excel** in the Sidebar to download a snapshot of your project's *current* state, including any drag-and-drop edits you made.
 
 ### 5. Advanced Enterprise Tools
-* **AI Health Analyst**: Click the **AI Report** button in the sidebar to generate a 3-paragraph executive summary detailing critical path risks and mitigations using Google Gemini.
+* **AI Health Analyst**: Click the **AI Report** button in the sidebar to generate a 3-paragraph executive summary detailing critical path risks and mitigations using Google Gemini or OpenAI GPT-4o.
 * **Graphical Dashboard**: Navigate to the Dashboard view to see live Recharts visualizations for **Agile Sprint Burn-down** and an **Executive S-Curve** tracking actual costs versus baseline plans.
+  * **Export to PDF**: Generate a high-fidelity image snapshot of your dashboard layout.
+  * **Export to PowerPoint (PPTX)**: Generate a native, 3-slide `.pptx` presentations instantly. It auto-builds an Executive Abstract slide (integrating your customized Brand Profile color & logo), a slide for your tabular KPIs, and high-resolution chart graphics.
 * **Real-time Multiplayer**: By default, Project-Flow utilizes a `Yjs` WebSockets engine. Coworkers opening the same session will have live, real-time cursors visible on the screen. 
-* **Enterprise Branding**: Click **Brand Profile** to upload your own corporate logo and alter the primary/secondary UI colors. Any PDF exported natively assumes these styles.
+* **Enterprise Branding**: Click **Brand Profile** to upload your own corporate logo and alter the primary/secondary UI colors. Any PDF or PPTX exported natively assumes these styles.
 
 ---
 
