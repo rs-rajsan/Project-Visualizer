@@ -76,6 +76,12 @@ A high-density matrix visualizing team capacity over the project lifecycle.
 * **Assignee Isolation**: Use the Sidebar dropdown to filter by team member. This seamlessly filters the Graph, Gantt, and Heatmap components to reflect only the selected individual's responsibilities.
 * **Data Export**: Click **CSV** or **Excel** in the Sidebar to download a snapshot of your project's *current* state, including any drag-and-drop edits you made.
 
+### 5. Advanced Enterprise Tools
+* **AI Health Analyst**: Click the **AI Report** button in the sidebar to generate a 3-paragraph executive summary detailing critical path risks and mitigations using Google Gemini.
+* **Graphical Dashboard**: Navigate to the Dashboard view to see live Recharts visualizations for **Agile Sprint Burn-down** and an **Executive S-Curve** tracking actual costs versus baseline plans.
+* **Real-time Multiplayer**: By default, Project-Flow utilizes a `Yjs` WebSockets engine. Coworkers opening the same session will have live, real-time cursors visible on the screen. 
+* **Enterprise Branding**: Click **Brand Profile** to upload your own corporate logo and alter the primary/secondary UI colors. Any PDF exported natively assumes these styles.
+
 ---
 
 ## 💻 Architecture Notes (For Developers)

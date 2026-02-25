@@ -295,9 +295,10 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                                                 "absolute top-1/2 -translate-y-1/2 h-6 rounded-md shadow flex items-center px-2 overflow-hidden",
                                                 item.type === 'phase' ? 'bg-indigo-600/80 border border-indigo-500' :
                                                     item.type === 'milestone' ? 'bg-orange-600/80 border border-orange-500 h-5' :
-                                                        (isDelayed ? 'bg-rose-600/80 border border-rose-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'
-                                                            : 'bg-cyan-600/60 border border-cyan-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'),
-                                                dragInfo?.id === item.id ? (isDelayed ? 'z-30 scale-105 shadow-xl !bg-rose-500 opacity-100' : 'z-30 scale-105 shadow-xl !bg-cyan-500 opacity-100') : ''
+                                                        (item.snowTicket ? 'bg-rose-500/90 border-2 border-rose-300 h-4 cursor-grab shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-pulse shadow-rose-500 transition-transform duration-75'
+                                                            : isDelayed ? 'bg-rose-600/80 border border-rose-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'
+                                                                : 'bg-cyan-600/60 border border-cyan-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'),
+                                                dragInfo?.id === item.id ? (isDelayed || item.snowTicket ? 'z-30 scale-105 shadow-xl !bg-rose-500 opacity-100' : 'z-30 scale-105 shadow-xl !bg-cyan-500 opacity-100') : ''
                                             )}
                                             style={getPositionStyles(item)}
                                         >

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock, BarChart3, Server } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock, BarChart3, Server, Sparkles, Palette } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 const Sidebar = ({
@@ -14,7 +14,9 @@ const Sidebar = ({
     onBaselineUpload,
     statusFilter = null,
     setStatusFilter,
-    onOpenJira
+    onOpenJira,
+    onOpenAI,
+    onOpenBrandConfig
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
@@ -152,13 +154,34 @@ const Sidebar = ({
                         Compare Baseline
                     </button>
 
+                    <div className="flex gap-2 w-full mt-2">
+                        <button
+                            onClick={onOpenJira}
+                            className="flex-1 text-[10px] uppercase tracking-wider font-semibold text-indigo-400 hover:text-indigo-300 py-1.5 px-2 rounded border border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/10 hover:bg-indigo-500/20 transition-all text-center flex flex-col items-center justify-center gap-1"
+                            title="Live sync with enterprise Jira boards"
+                        >
+                            <Server className="w-3.5 h-3.5" />
+                            Live Jira
+                        </button>
+
+                        <button
+                            onClick={onOpenAI}
+                            className="flex-1 text-[10px] uppercase tracking-wider font-semibold text-amber-500 hover:text-amber-400 py-1.5 px-2 rounded border border-amber-500/30 hover:border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20 transition-all text-center flex flex-col items-center justify-center gap-1 shadow-sm"
+                            title="Generate an AI Project Health Report"
+                        >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            AI Report
+                        </button>
+                    </div>
+
                     <button
-                        onClick={onOpenJira}
-                        className="w-full mt-2 text-[10px] uppercase tracking-wider font-semibold text-indigo-400 hover:text-indigo-300 py-1.5 px-2 rounded border border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/10 hover:bg-indigo-500/20 transition-all text-center flex items-center justify-center gap-1.5"
-                        title="Live sync with enterprise Jira boards"
+                        onClick={onOpenBrandConfig}
+                        className="w-full mt-2 text-[10px] uppercase tracking-wider font-semibold text-rose-400 hover:text-rose-300 py-1.5 px-2 rounded border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 transition-all text-center flex items-center justify-center gap-1.5"
+                        title="Configure Enterprise Style & Branding"
+                        style={{ color: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', opacity: 0.8 }}
                     >
-                        <Server className="w-3 h-3" />
-                        Sync with Jira
+                        <Palette className="w-3 h-3" />
+                        Brand Profile
                     </button>
                 </div>
 

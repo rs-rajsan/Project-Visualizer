@@ -3,10 +3,13 @@ import { FileText, Clock, CheckCircle2, AlertCircle, Users, Download, Maximize, 
 import { DateUtils } from '../utils/DateUtils';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useTheme } from './ThemeProvider';
 
 export const Dashboard = ({ data }) => {
     const dashboardRef = useRef(null);
     const [isExporting, setIsExporting] = useState(false);
+    const { themeConfig } = useTheme();
 
     const metrics = useMemo(() => {
         let total = 0;
@@ -57,6 +60,73 @@ export const Dashboard = ({ data }) => {
         };
     }, [data]);
 
+    const chartData = useMemo(() => {
+        if (!data || data.length === 0) return [];
+
+        let minDate = Infinity;
+        let maxDate = -Infinity;
+        const validTasks = [];
+
+        data.forEach(task => {
+            if (task.nodeType !== 'task') return;
+            const bounds = DateUtils.getTaskBounds(task);
+            const baseline = DateUtils.getBaselineBounds(task);
+
+            if (bounds && isFinite(bounds.endTime)) {
+                minDate = Math.min(minDate, bounds.startTime || bounds.endTime);
+                maxDate = Math.max(maxDate, bounds.endTime);
+                validTasks.push({ ...task, bounds, baseline });
+            }
+        });
+
+        if (minDate === Infinity || maxDate === -Infinity) return [];
+
+        const dayMs = 1000 * 60 * 60 * 24;
+        const result = [];
+        const totalTasks = validTasks.length;
+
+        for (let time = minDate; time <= maxDate + (dayMs * 2); time += dayMs) {
+            let dailyActualCost = 0;
+            let dailyBaselineCost = 0;
+            let completedTasks = 0;
+            let idealCompletedTasks = 0;
+
+            validTasks.forEach(task => {
+                const cost = parseInt(task.cost, 10) || 0;
+
+                if (task.bounds.endTime <= time) {
+                    dailyActualCost += cost;
+                    completedTasks++;
+                }
+
+                if (task.baseline && task.baseline.baselineEndTime <= time) {
+                    dailyBaselineCost += cost;
+                    idealCompletedTasks++;
+                } else if (!task.baseline && task.bounds.endTime <= time) { // fallback
+                    dailyBaselineCost += cost;
+                    idealCompletedTasks++;
+                }
+            });
+
+            result.push({
+                date: new Date(time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                timestamp: time,
+                ActualCost: dailyActualCost,
+                BaselineCost: dailyBaselineCost,
+                RemainingTasks: totalTasks - completedTasks,
+                IdealRemaining: totalTasks - idealCompletedTasks
+            });
+        }
+
+        // Optimize data points to prevent chart lag if too many days (e.g. > 45)
+        if (result.length > 45) {
+            const step = Math.ceil(result.length / 30);
+            return result.filter((_, i) => i % step === 0 || i === result.length - 1);
+        }
+
+        return result;
+    }, [data]);
+
     const handleExportPDF = async () => {
         if (!dashboardRef.current) return;
         setIsExporting(true);
@@ -89,7 +159,11 @@ export const Dashboard = ({ data }) => {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3 tracking-tight">
-                        <FileText className="w-8 h-8 text-indigo-400" />
+                        {themeConfig?.logoUrl ? (
+                            <img src={themeConfig.logoUrl} alt="Logo" className="max-h-12 object-contain" />
+                        ) : (
+                            <FileText className="w-8 h-8" style={{ color: 'var(--brand-primary, #818cf8)' }} />
+                        )}
                         Executive Abstract
                     </h1>
                     <p className="text-slate-400 mt-2 text-sm max-w-2xl leading-relaxed">
@@ -114,10 +188,10 @@ export const Dashboard = ({ data }) => {
                     title="Total Tasks"
                     value={metrics.total}
                     subtitle={`${metrics.completed} successfully completed`}
-                    icon={<FileText className="text-indigo-400 w-5 h-5" />}
+                    icon={<FileText className="w-5 h-5" style={{ color: 'var(--brand-primary, #818cf8)' }} />}
                     trend={`${metrics.percentComplete}% Progress`}
                     trendUp={true}
-                    borderClass="border-indigo-500/30"
+                    borderClass="border-slate-700/50"
                 />
                 <MetricCard
                     title="Active Resources"
@@ -147,33 +221,64 @@ export const Dashboard = ({ data }) => {
                 />
             </div>
 
-            {/* Chart Area Pre-allocation for future expansion */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="col-span-2 bg-slate-800/40 border border-slate-700/60 rounded-xl p-6 h-80 flex flex-col relative overflow-hidden">
-                    <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-teal-400 left-0"></div>
-                    <h3 className="text-lg font-semibold text-slate-200 mb-1">Velocity & Burn-down</h3>
-                    <p className="text-xs text-slate-400 mb-6">Historical aggregation versus predicted trajectory limits</p>
-                    <div className="flex-1 flex items-center justify-center opacity-30 border border-dashed border-slate-600 rounded-lg">
-                        <span className="text-slate-400 italic font-medium flex gap-2 items-center">
-                            <BarChart3 className="w-5 h-5" /> Charting Module Provisioned
-                        </span>
+            {/* Advanced Graphical Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Burn-down Chart */}
+                <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-6 h-96 flex flex-col relative overflow-hidden">
+                    <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-teal-500 to-indigo-400 left-0"></div>
+                    <h3 className="text-lg font-semibold text-slate-200 mb-1">Agile Sprint Burn-down</h3>
+                    <p className="text-xs text-slate-400 mb-6">Task completion velocity: Actual remaining vs Ideal trajectory</p>
+                    <div className="flex-1 w-full h-full min-h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickMargin={10} />
+                                <YAxis stroke="#94a3b8" fontSize={10} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f8fafc', fontSize: '12px', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#e2e8f0' }}
+                                />
+                                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                                <Line type="stepAfter" dataKey="RemainingTasks" name="Actual Remaining" stroke="#38bdf8" strokeWidth={3} dot={false} />
+                                <Line type="linear" dataKey="IdealRemaining" name="Ideal Remaining" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
 
-                <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-6 h-80 flex flex-col relative overflow-hidden">
+                {/* S-Curve Chart */}
+                <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-6 h-96 flex flex-col relative overflow-hidden">
                     <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-amber-400 to-rose-400 left-0"></div>
-                    <h3 className="text-lg font-semibold text-slate-200 mb-1">Financial Aggresion</h3>
-                    <p className="text-xs text-slate-400 mb-6">Total computed duration cost impact</p>
-
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="text-5xl font-black text-rose-300 drop-shadow-md tracking-tighter mb-2">
-                            {metrics.totalCost}
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-200 mb-1">Executive S-Curve</h3>
+                            <p className="text-xs text-slate-400 mb-6">Cumulative value aggregation: Earned Value vs Planned Value</p>
                         </div>
-                        <div className="text-sm font-semibold text-rose-400/80 uppercase tracking-widest">
-                            Value Score
+                        <div className="text-right">
+                            <span className="text-2xl font-black text-rose-300 drop-shadow-md">{metrics.totalCost}</span>
+                            <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Total Val.</p>
                         </div>
                     </div>
+
+                    <div className="flex-1 w-full h-full min-h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickMargin={10} />
+                                <YAxis stroke="#94a3b8" fontSize={10} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f8fafc', fontSize: '12px', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#e2e8f0' }}
+                                />
+                                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                                <Area type="monotone" dataKey="ActualCost" name="Earned Value (Actual CF)" stroke="#fbbf24" fill="#fbbf24" fillOpacity={0.2} strokeWidth={3} />
+                                <Area type="monotone" dataKey="BaselineCost" name="Planned Value (Baseline)" stroke="#f43f5e" fill="transparent" strokeWidth={2} strokeDasharray="4 4" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
+
             </div>
         </div>
     );

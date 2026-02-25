@@ -15,6 +15,10 @@ import { GanttChart } from './components/GanttChart';
 import { ResourceHeatmap } from './components/ResourceHeatmap';
 import { Dashboard } from './components/Dashboard';
 import { JiraConfigModal } from './components/JiraConfigModal';
+import { AIAssistantModal } from './components/AIAssistantModal';
+import { CollaborationProvider } from './components/CollaborationProvider';
+import { ThemeProvider } from './components/ThemeProvider';
+import { BrandConfigModal } from './components/BrandConfigModal';
 import { logger } from './utils/logger';
 import { Maximize } from 'lucide-react';
 import { ProjectDataProcessor } from './utils/projectDataProcessor';
@@ -68,6 +72,8 @@ const App = () => {
   const [statusFilter, setStatusFilter] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isJiraModalOpen, setIsJiraModalOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
@@ -427,6 +433,8 @@ const App = () => {
           setStatusFilter={setStatusFilter}
           onBaselineUpload={handleBaselineUpload}
           onOpenJira={() => setIsJiraModalOpen(true)}
+          onOpenAI={() => setIsAIModalOpen(true)}
+          onOpenBrandConfig={() => setIsBrandModalOpen(true)}
         />
       )}
 
@@ -436,6 +444,15 @@ const App = () => {
           isOpen={isJiraModalOpen}
           onClose={() => setIsJiraModalOpen(false)}
           onImport={handleJiraImport}
+        />
+        <AIAssistantModal
+          isOpen={isAIModalOpen}
+          onClose={() => setIsAIModalOpen(false)}
+          projectData={filteredData}
+        />
+        <BrandConfigModal
+          isOpen={isBrandModalOpen}
+          onClose={() => setIsBrandModalOpen(false)}
         />
         {/* Header / Breadcrumb Placeholder */}
         {!isFullscreen && (
@@ -542,4 +559,12 @@ const App = () => {
   );
 };
 
-export default App;
+export default function AppWithMultiplayer() {
+  return (
+    <ThemeProvider>
+      <CollaborationProvider>
+        <App />
+      </CollaborationProvider>
+    </ThemeProvider>
+  );
+}

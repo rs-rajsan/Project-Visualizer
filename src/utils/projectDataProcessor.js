@@ -13,7 +13,8 @@ const HEADER_ALIASES = {
     startDate: ['start date', 'start', 'begin', 'created'],
     endDate: ['end date', 'end', 'due', 'due date', 'deadline'],
     assignee: ['assignee', 'owner', 'resource', 'assigned to', 'person'],
-    progress: ['progress', 'percent complete', '% complete', 'completion', 'status']
+    progress: ['progress', 'percent complete', '% complete', 'completion', 'status'],
+    snowTicket: ['snow ticket', 'servicenow', 'incident', 'chg', 'req', 'snow']
 };
 
 export class ProjectDataProcessor {

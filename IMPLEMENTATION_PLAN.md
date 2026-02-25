@@ -190,26 +190,26 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 - [ ] Enable Bi-directional Sync allowing users to push Sandbox structural edits back to MS Project.
 
 ### Sub-Phase 13.3: Issue & Ticket Tracking (ServiceNow Integration)
-- [ ] Connect to ServiceNow APIs to pull incident/problem tickets as project dependencies or risk nodes.
-- [ ] Map ServiceNow tickets to distinct node types with unique alerting visual states on the Gantt and Canvas.
-- [ ] Implement robust REST API handlers to live-query ticket status and automatically update visual progress.
+- [x] Connect to ServiceNow APIs to pull incident/problem tickets as project dependencies or risk nodes.
+- [x] Map ServiceNow tickets to distinct node types with unique alerting visual states on the Gantt and Canvas.
+- [x] Implement robust REST API handlers to live-query ticket status and automatically update visual progress.
 
 ### Sub-Phase 13.4: AI Project Health Analyst (LLM Integration)
-- [ ] Interface the existing `InsightsPanel.jsx` with Gemini/OpenAI models executing graph heuristics.
-- [ ] Generate natural-language "Health Reports" based directly on structural and baseline deviations.
-- [ ] Implement predictive bottlenecks: AI-driven suggestions for specific resource reallocations to aggressively reduce Critical Path duration.
+- [x] Interface the existing `InsightsPanel.jsx` with Gemini/OpenAI models executing graph heuristics.
+- [x] Generate natural-language "Health Reports" based directly on structural and baseline deviations.
+- [x] Implement predictive bottlenecks: AI-driven suggestions for specific resource reallocations to aggressively reduce Critical Path duration.
 
 ### Sub-Phase 13.5: Advanced Graphical Analytics (Burn-down Metrics)
-- [ ] Integrate graphical libraries (e.g., Recharts) to populate the Velocity & Burn-down shell established in Phase 12.
-- [ ] Visualize timeline progression vs. mapped baseline expectations over time.
-- [ ] Synthesize cost curves representing aggregate daily cost burn rates to augment Executive Reporting exports.
+- [x] Integrate graphical libraries (e.g., Recharts) to populate the Velocity & Burn-down shell established in Phase 12.
+- [x] Visualize timeline progression vs. mapped baseline expectations over time.
+- [x] Synthesize cost curves representing aggregate daily cost burn rates to augment Executive Reporting exports.
 
 ### Sub-Phase 13.6: Real-time Multiplayer Collaboration
-- [ ] Wire up WebSockets and CRDTs (Conflict-free Replicated Data Types, e.g., `yjs`) to support shared session states.
-- [ ] Allow multiple stakeholders (PMOs, Executives) to collaboratively view/edit the same Project Canvas simultaneously.
-- [ ] Display real-time UI cursors visualizing peer focus states (e.g. what nodes are being actively expanded/adjusted).
+- [x] Wire up WebSockets and CRDTs (Conflict-free Replicated Data Types, e.g., `yjs`) to support shared session states.
+- [x] Allow multiple stakeholders (PMOs, Executives) to collaboratively view/edit the same Project Canvas simultaneously.
+- [x] Display real-time UI cursors visualizing peer focus states (e.g. what nodes are being actively expanded/adjusted).
 
 ### Sub-Phase 13.7: Enterprise Theming & Brand Exporting
-- [ ] Construct dynamic CSS/Theming engines permitting users to define specific Hex codes and brand palettes.
-- [ ] Allow injection of corporate logos.
-- [ ] Propagate branding vectors to the `html2canvas` module ensuring that all exported Executive PDFs inherently match the organization's corporate identity.
+- [x] Construct dynamic CSS/Theming engines permitting users to define specific Hex codes and brand palettes.
+- [x] Allow injection of corporate logos.
+- [x] Propagate branding vectors to the `html2canvas` module ensuring that all exported Executive PDFs inherently match the organization's corporate identity.

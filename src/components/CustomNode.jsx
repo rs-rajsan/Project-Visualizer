@@ -30,6 +30,8 @@ const CustomNode = ({ data, selected }) => {
 
     // Phase 1 basic theming (DRY). Phase 4 will expand this context properly.
     const getThemeClasses = () => {
+        if (data.snowTicket) return 'bg-rose-50 border-rose-600 text-rose-950 shadow-[0_0_15px_rgba(225,29,72,0.6)] animate-pulse'; // SNOW Blocker
+
         if (data.nodeType === 'task') {
             if (isDelayed) return 'bg-rose-50 border-rose-500 text-rose-950 shadow-rose-500/30';
             return 'bg-cyan-50 border-cyan-400 text-cyan-950 shadow-sm'; // Task explicit theme
@@ -95,6 +97,11 @@ const CustomNode = ({ data, selected }) => {
                             <div className="flex items-center gap-0.5 text-[7px] font-medium opacity-70">
                                 <Link className="w-1.5 h-1.5 text-indigo-500" />
                                 {String(data.dependencies).split(',').filter(Boolean).length}
+                            </div>
+                        )}
+                        {data.snowTicket && (
+                            <div className="flex items-center gap-0.5 text-[7px] font-bold text-rose-600 bg-rose-100 px-1 rounded-sm border border-rose-200">
+                                SNOW: {data.snowTicket}
                             </div>
                         )}
                         {data.progress && data.nodeType === 'task' && (
