@@ -146,13 +146,13 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 
 ---
 
-## Phase 11: Progress Tracking & Risk Mitigation 🟡
+## Phase 11: Progress Tracking & Risk Mitigation �
 **Goal:** Track execution reality against absolute data baselines.
 
 - [x] Modify `projectDataProcessor.js` to accept secondary "Baseline" historical uploads.
 - [x] Render shadow SVG elements mimicking original baseline bounds.
 - [x] Implement volatile "Sandbox Mode" for active impact analysis isolated from master state.
-- [ ] Implement boolean status chip filtering ("Overdue", "At Risk").
+- [x] Implement boolean status chip filtering ("Overdue", "At Risk").
 
 ---
 

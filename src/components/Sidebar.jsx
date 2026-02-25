@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 const Sidebar = ({
@@ -11,7 +11,9 @@ const Sidebar = ({
     assignees = [],
     selectedAssignee = null,
     onAssigneeFilter,
-    onBaselineUpload
+    onBaselineUpload,
+    statusFilter = null,
+    setStatusFilter
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
@@ -198,6 +200,32 @@ const Sidebar = ({
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
                             <ChevronDown className="w-4 h-4" />
                         </div>
+                    </div>
+                </div>
+
+                {/* STATUS CHIP FILTER (OVERDUE / AT RISK) */}
+                <div className="mt-8">
+                    <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Filter className="w-3 h-3 text-indigo-400" />
+                        Status Filter
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => setStatusFilter && setStatusFilter(statusFilter === 'overdue' ? null : 'overdue')}
+                            className={`flex-[1_0_40%] py-1.5 px-3 text-[10px] font-bold rounded-full transition-all border flex items-center justify-center gap-1.5 ${statusFilter === 'overdue' ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/50 hover:text-slate-200'}`}
+                            title="Tasks finishing past their baseline projection"
+                        >
+                            <Clock className="w-3 h-3" />
+                            Overdue
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter && setStatusFilter(statusFilter === 'atRisk' ? null : 'atRisk')}
+                            className={`flex-[1_0_40%] py-1.5 px-3 text-[10px] font-bold rounded-full transition-all border flex items-center justify-center gap-1.5 ${statusFilter === 'atRisk' ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/50 hover:text-slate-200'}`}
+                            title="Tasks meeting their baseline projection with no buffer"
+                        >
+                            <AlertCircle className="w-3 h-3" />
+                            At Risk
+                        </button>
                     </div>
                 </div>
 

@@ -1,5 +1,6 @@
 import { logger } from './logger';
 import { MarkerType } from 'reactflow';
+import { DateUtils } from './DateUtils';
 
 export class VisibilityManager {
     /**
@@ -23,6 +24,22 @@ export class VisibilityManager {
                 // Apply Filter if present
                 if (internalFilter.assignee && task.assignee !== internalFilter.assignee) {
                     return;
+                }
+
+                if (internalFilter.status) {
+                    const bounds = DateUtils.getTaskBounds(task);
+                    const baseline = DateUtils.getBaselineBounds(task);
+
+                    if (!bounds || !baseline || !isFinite(bounds.endTime) || !isFinite(baseline.baselineEndTime)) {
+                        return; // Non-matching if bounds can't be computed or no baseline exists
+                    }
+
+                    if (internalFilter.status === 'overdue' && bounds.endTime <= baseline.baselineEndTime) {
+                        return;
+                    }
+                    if (internalFilter.status === 'atRisk' && bounds.endTime !== baseline.baselineEndTime) {
+                        return;
+                    }
                 }
 
                 const phaseName = task.phase || 'Unphased';

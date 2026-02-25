@@ -19,6 +19,7 @@ import { LayoutAlgorithm } from './utils/layoutAlgorithm';
 import { VisibilityManager } from './utils/visibilityManager';
 import { CriticalPathAlgorithm } from './utils/criticalPathAlgorithm';
 import { ExportService } from './utils/exportService';
+import { DateUtils } from './utils/DateUtils';
 
 // Initial dummy elements for placeholder canvas
 const initialNodes = [
@@ -61,14 +62,15 @@ const App = () => {
   const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt' | 'resources'
   const [assigneeFilter, setAssigneeFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
-  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions, currentAssigneeFilter = assigneeFilter) => {
-    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId, filter: currentAssigneeFilter });
+  const renderGraph = useCallback((data, currentDrillState, activeTaskId = null, existingUserPositions = userPositions, currentAssigneeFilter = assigneeFilter, currentStatusFilter = statusFilter) => {
+    const traceId = logger.startTrace({ action: 'render_graph', activeTaskId, filter: currentAssigneeFilter, status: currentStatusFilter });
 
     try {
-      let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState, { assignee: currentAssigneeFilter });
+      let { nodes: visibleNodes, edges: visibleEdges } = VisibilityManager.deriveGraph(data, currentDrillState, { assignee: currentAssigneeFilter, status: currentStatusFilter });
 
       // Apply user overrides before layout
       visibleNodes = visibleNodes.map(node => {
@@ -134,7 +136,7 @@ const App = () => {
     } finally {
       logger.endTrace();
     }
-  }, [setNodes, setEdges, showCriticalPath, drillState, userPositions, assigneeFilter]);
+  }, [setNodes, setEdges, showCriticalPath, drillState, userPositions, assigneeFilter, statusFilter]);
 
   const handleFileUpload = useCallback(async (file) => {
     logger.info(`App component received file: ${file.name}`);
@@ -349,9 +351,9 @@ const App = () => {
   // React to Critical Path toggles automatically
   useEffect(() => {
     if (activeData.length > 0) {
-      renderGraph(activeData, drillState, selectedTaskId, userPositions, assigneeFilter);
+      renderGraph(activeData, drillState, selectedTaskId, userPositions, assigneeFilter, statusFilter);
     }
-  }, [activeData, drillState, selectedTaskId, showCriticalPath, assigneeFilter, userPositions, renderGraph]);
+  }, [activeData, drillState, selectedTaskId, showCriticalPath, assigneeFilter, statusFilter, userPositions, renderGraph]);
 
   const uniqueAssignees = useMemo(() => {
     const assignees = new Set();
@@ -362,9 +364,23 @@ const App = () => {
   }, [activeData]);
 
   const filteredData = useMemo(() => {
-    if (!assigneeFilter) return activeData;
-    return activeData.filter(t => String(t.assignee).trim() === assigneeFilter);
-  }, [activeData, assigneeFilter]);
+    let result = activeData;
+    if (assigneeFilter) {
+      result = result.filter(t => String(t.assignee).trim() === assigneeFilter);
+    }
+    if (statusFilter) {
+      result = result.filter(t => {
+        const bounds = DateUtils.getTaskBounds(t);
+        const baseline = DateUtils.getBaselineBounds(t);
+        if (!bounds || !baseline || !isFinite(bounds.endTime) || !isFinite(baseline.baselineEndTime)) return false;
+
+        if (statusFilter === 'overdue' && bounds.endTime <= baseline.baselineEndTime) return false;
+        if (statusFilter === 'atRisk' && bounds.endTime !== baseline.baselineEndTime) return false;
+        return true;
+      });
+    }
+    return result;
+  }, [activeData, assigneeFilter, statusFilter]);
 
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans">
@@ -378,6 +394,8 @@ const App = () => {
         assignees={uniqueAssignees}
         selectedAssignee={assigneeFilter}
         onAssigneeFilter={setAssigneeFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
         onBaselineUpload={handleBaselineUpload}
       />
 
