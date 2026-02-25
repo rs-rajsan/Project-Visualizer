@@ -13,7 +13,9 @@ import CustomNode from './components/CustomNode';
 import SmartEdge from './components/SmartEdge';
 import { GanttChart } from './components/GanttChart';
 import { ResourceHeatmap } from './components/ResourceHeatmap';
+import { Dashboard } from './components/Dashboard';
 import { logger } from './utils/logger';
+import { Maximize } from 'lucide-react';
 import { ProjectDataProcessor } from './utils/projectDataProcessor';
 import { LayoutAlgorithm } from './utils/layoutAlgorithm';
 import { VisibilityManager } from './utils/visibilityManager';
@@ -60,9 +62,10 @@ const App = () => {
   const [userPositions, setUserPositions] = useState({}); // Stores manual drags
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
-  const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt' | 'resources'
+  const [viewMode, setViewMode] = useState('network'); // 'network' | 'gantt' | 'resources' | 'dashboard'
   const [assigneeFilter, setAssigneeFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeBreadcrumb, setActiveBreadcrumb] = useState('Waiting for Data...');
 
   // Core Render Flow using Derived State Pattern
@@ -348,6 +351,15 @@ const App = () => {
     setActiveBreadcrumb('Canvas View');
   }, []);
 
+  // Listen for Escape key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsFullscreen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // React to Critical Path toggles automatically
   useEffect(() => {
     if (activeData.length > 0) {
@@ -385,63 +397,74 @@ const App = () => {
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans">
       {/* Sidebar Component */}
-      <Sidebar
-        onFileUpload={handleFileUpload}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onExportCSV={handleExportCSV}
-        onExportExcel={handleExportExcel}
-        assignees={uniqueAssignees}
-        selectedAssignee={assigneeFilter}
-        onAssigneeFilter={setAssigneeFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        onBaselineUpload={handleBaselineUpload}
-      />
+      {!isFullscreen && (
+        <Sidebar
+          onFileUpload={handleFileUpload}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onExportCSV={handleExportCSV}
+          onExportExcel={handleExportExcel}
+          assignees={uniqueAssignees}
+          selectedAssignee={assigneeFilter}
+          onAssigneeFilter={setAssigneeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          onBaselineUpload={handleBaselineUpload}
+        />
+      )}
 
       {/* Main Canvas Area */}
       <div className="flex-1 relative h-full w-full">
         {/* Header / Breadcrumb Placeholder */}
-        <header className="absolute top-0 left-0 w-full h-14 bg-slate-900/80 backdrop-blur border-b border-slate-800 z-10 flex items-center justify-between px-6">
-          <h2 className="text-slate-300 font-medium text-sm tracking-wide transition-all duration-300">
-            <span className="text-indigo-400">Project</span>
-            <span className="mx-2 text-slate-600">/</span>
-            <span className="text-slate-400">{isProcessing ? 'Processing Data...' : activeBreadcrumb}</span>
-          </h2>
+        {!isFullscreen && (
+          <header className="absolute top-0 left-0 w-full h-14 bg-slate-900/80 backdrop-blur border-b border-slate-800 z-10 flex items-center justify-between px-6">
+            <h2 className="text-slate-300 font-medium text-sm tracking-wide transition-all duration-300">
+              <span className="text-indigo-400">Project</span>
+              <span className="mx-2 text-slate-600">/</span>
+              <span className="text-slate-400">{isProcessing ? 'Processing Data...' : activeBreadcrumb}</span>
+            </h2>
 
-          <div className="flex items-center gap-4">
-            {isSandboxMode && (
-              <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded">
-                Sandbox Active
-              </span>
-            )}
-            <button
-              onClick={() => {
-                if (!isSandboxMode) {
-                  setSandboxData(rawData.map(task => ({ ...task })));
-                  setIsSandboxMode(true);
-                } else {
-                  setIsSandboxMode(false);
-                  setSandboxData([]);
-                  renderGraph(rawData, drillState, selectedTaskId);
-                }
-              }}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${isSandboxMode ? 'bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:bg-amber-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
-            >
-              {isSandboxMode ? 'Discard Changes' : 'Sandbox Mode'}
-            </button>
+            <div className="flex items-center gap-4">
+              {isSandboxMode && (
+                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded">
+                  Sandbox Active
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  if (!isSandboxMode) {
+                    setSandboxData(rawData.map(task => ({ ...task })));
+                    setIsSandboxMode(true);
+                  } else {
+                    setIsSandboxMode(false);
+                    setSandboxData([]);
+                    renderGraph(rawData, drillState, selectedTaskId);
+                  }
+                }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${isSandboxMode ? 'bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:bg-amber-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+              >
+                {isSandboxMode ? 'Discard Changes' : 'Sandbox Mode'}
+              </button>
 
-            <button
-              onClick={() => setShowCriticalPath(prev => !prev)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${showCriticalPath ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
-            >
-              Critical Path {showCriticalPath ? 'On' : 'Off'}
-            </button>
-          </div>
-        </header>
+              <button
+                onClick={() => setShowCriticalPath(prev => !prev)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${showCriticalPath ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+              >
+                Critical Path {showCriticalPath ? 'On' : 'Off'}
+              </button>
+              <button
+                onClick={() => setIsFullscreen(true)}
+                className="px-2 py-1.5 rounded-full bg-slate-800 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all flex items-center gap-2 text-xs font-bold border border-transparent hover:border-indigo-500/30"
+                title="Enter Presentation Mode (Press Esc to exit)"
+              >
+                <Maximize className="w-4 h-4" />
+              </button>
+            </div>
+          </header>
+        )}
 
         {/* Main Workspace Area */}
-        <div className="pt-14 h-full w-full bg-slate-950 overflow-auto custom-scrollbar">
+        <div className={`${isFullscreen ? 'pt-0' : 'pt-14'} h-full w-full bg-slate-950 overflow-auto custom-scrollbar`}>
           {viewMode === 'gantt' ? (
             <GanttChart
               data={filteredData}
@@ -453,6 +476,10 @@ const App = () => {
           ) : viewMode === 'resources' ? (
             <div className="p-6">
               <ResourceHeatmap data={filteredData} />
+            </div>
+          ) : viewMode === 'dashboard' ? (
+            <div className="overflow-y-auto w-full h-full">
+              <Dashboard data={filteredData} />
             </div>
           ) : (
             <ReactFlow

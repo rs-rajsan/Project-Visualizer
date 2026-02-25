@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Network, List, Download, Users, Filter, ChevronDown, AlertCircle, Clock, BarChart3 } from 'lucide-react';
 import { logger } from '../utils/logger';
 
 const Sidebar = ({
@@ -177,6 +177,13 @@ const Sidebar = ({
                         >
                             <Users className="w-3.5 h-3.5" />
                             Resources
+                        </button>
+                        <button
+                            onClick={() => setViewMode('dashboard')}
+                            className={`flex-1 min-w-[60px] flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-bold rounded-md transition-all ${viewMode === 'dashboard' ? 'bg-rose-500/20 text-rose-300 shadow-sm border border-rose-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
+                        >
+                            <BarChart3 className="w-3.5 h-3.5" />
+                            Dashboard
                         </button>
                     </div>
                 </div>
