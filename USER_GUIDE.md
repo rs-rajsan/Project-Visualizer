@@ -81,6 +81,7 @@ A high-density matrix visualizing team capacity over the project lifecycle.
 * **Graphical Dashboard**: Navigate to the Dashboard view to see live Recharts visualizations for **Agile Sprint Burn-down** and an **Executive S-Curve** tracking actual costs versus baseline plans.
   * **Export to PDF**: Generate a high-fidelity image snapshot of your dashboard layout.
   * **Export to PowerPoint (PPTX)**: Generate a native, 3-slide `.pptx` presentations instantly. It auto-builds an Executive Abstract slide (integrating your customized Brand Profile color & logo), a slide for your tabular KPIs, and high-resolution chart graphics.
+  * **Export to Gamma AI (Markdown)**: Generate a highly structured Markdown file (`.md`). You can import this file directly into [Gamma App](https://gamma.app) to instantly synthesize a beautifully designed, AI-generated slide deck based on your project's KPIs.
 * **Real-time Multiplayer**: By default, Project-Flow utilizes a `Yjs` WebSockets engine. Coworkers opening the same session will have live, real-time cursors visible on the screen. 
 * **Enterprise Branding**: Click **Brand Profile** to upload your own corporate logo and alter the primary/secondary UI colors. Any PDF or PPTX exported natively assumes these styles.
 
