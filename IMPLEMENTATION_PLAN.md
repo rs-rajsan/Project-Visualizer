@@ -162,12 +162,17 @@ Standardized node geometry to align with enterprise flowchart spec. Devised a ca
 
 ---
 
-## Phase 12: Executive Reporting 🔴
+## Phase 12: Executive Reporting 🟢
 **Goal:** Surface micro-level logic to macro-level business dashboards.
 
-- [ ] Develop `Dashboard.jsx` encapsulating absolute metrics (Velocity, Burn-down charts).
-- [ ] Embed rasterization libraries (e.g. `html2canvas`) for programmatic PDF image export snapshots.
-- [ ] Integrate full-screen, sidebar-hidden "Presentation Mode".
+- [x] Develop `Dashboard.jsx` encapsulating absolute metrics (Velocity, Burn-down charts).
+- [x] Embed rasterization libraries (e.g. `html2canvas`) for programmatic PDF image export snapshots.
+- [x] Integrate full-screen, sidebar-hidden "Presentation Mode".
+
+### What I Did & Developed
+* **Executive Abstract Dashboard (`Dashboard.jsx`)**: Designed an elegant 'Dashboard' pane showcasing top-level automated KPIs spanning Total Tasks, Active Distinct Resources, tasks critically devoid of slack ("At Risk"), and overdue parameters. The architecture was provisioned to scale into graphical Burn-down curves if extended. 
+* **Snapshot Rasterization logic**: Brought in standard `html2canvas` paired with `jspdf` to bind arbitrary node trees directly into standardized `.pdf` blobs on demand. Wired it natively to a distinct 'Export Report' action button in the Dashboard header.
+* **Streamlined Presentation Mode (`App.jsx`)**: Linked a `isFullscreen` state hook triggered by the 'Maximize' symbol. This systematically un-mounts the configuration sidebar and top-banner navigation headers, snapping the active viewing metric into a flawless border-to-border projection screen (escaped easily via the Escape keyboard standard listener hook).
 
 ---
 
