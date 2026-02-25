@@ -10,10 +10,12 @@ const Sidebar = ({
     onExportExcel,
     assignees = [],
     selectedAssignee = null,
-    onAssigneeFilter
+    onAssigneeFilter,
+    onBaselineUpload
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
+    const baselineInputRef = useRef(null);
 
     const handleDragOver = useCallback((e) => {
         e.preventDefault();
@@ -70,6 +72,14 @@ const Sidebar = ({
         }
     }, [processFile]);
 
+    const handleBaselineSelect = useCallback((e) => {
+        const files = e.target.files;
+        if (files && files.length > 0 && onBaselineUpload) {
+            onBaselineUpload(files[0]);
+            e.target.value = null;
+        }
+    }, [onBaselineUpload]);
+
     return (
         <aside className="w-80 h-full bg-slate-900 border-r border-slate-800 flex flex-col p-6 text-slate-100 flex-shrink-0">
             <div className="flex items-center gap-3 mb-8">
@@ -119,6 +129,25 @@ const Sidebar = ({
                     <p className="text-xs text-slate-400">
                         CSV, XLSX, or XLS
                     </p>
+                </div>
+
+                {/* Baseline Upload Button */}
+                <div className="mt-3">
+                    <input
+                        type="file"
+                        ref={baselineInputRef}
+                        className="hidden"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        onChange={handleBaselineSelect}
+                    />
+                    <button
+                        onClick={() => baselineInputRef.current?.click()}
+                        className="w-full text-xs font-medium bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg border border-slate-700 hover:border-slate-600 transition-all text-center flex items-center justify-center gap-2"
+                        title="Upload a historical projection to compare against the current timeline."
+                    >
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                        Compare to Baseline
+                    </button>
                 </div>
 
                 <div className="mt-8">

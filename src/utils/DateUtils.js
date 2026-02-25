@@ -38,6 +38,32 @@ export class DateUtils {
     }
 
     /**
+     * Get start and end dates for a task's baseline if available.
+     * @param {Object} task 
+     * @returns {Object|null} { baselineStart, baselineEnd, baselineStartTime, baselineEndTime }
+     */
+    static getBaselineBounds(task) {
+        if (!task.baselineStartDate) return null;
+        let start = this.parseDate(task.baselineStartDate);
+        if (!start) return null;
+
+        let end = this.parseDate(task.baselineEndDate);
+        if (!end && task.baselineCost) {
+            end = new Date(start);
+            end.setDate(end.getDate() + parseInt(task.baselineCost, 10));
+        } else if (!end) {
+            end = new Date(start);
+        }
+
+        return {
+            baselineStart: start,
+            baselineEnd: end,
+            baselineStartTime: start.getTime(),
+            baselineEndTime: end.getTime()
+        };
+    }
+
+    /**
      * Format date as YYYY-MM-DD
      * @param {Date} date 
      */

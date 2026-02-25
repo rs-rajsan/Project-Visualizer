@@ -155,6 +155,28 @@ const App = () => {
     }
   }, [renderGraph]);
 
+  const handleBaselineUpload = useCallback(async (file) => {
+    logger.info(`App component received baseline file: ${file.name}`);
+    setIsProcessing(true);
+
+    try {
+      const updatedRawData = await ProjectDataProcessor.processBaselineFile(file, rawData);
+      setRawData(updatedRawData);
+
+      // Re-render graph while keeping drill state
+      setDrillState(prev => {
+        renderGraph(updatedRawData, prev, selectedTaskId);
+        return prev;
+      });
+      logger.info('Baseline fully merged and graph re-rendered');
+    } catch (error) {
+      logger.error('Error during baseline processing', error);
+      alert(`Failed to parse baseline file: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [rawData, selectedTaskId, renderGraph]);
+
   const handleNodeClick = useCallback((event, node) => {
     if (node.data.nodeType === 'task') {
       setSelectedTaskId(prev => {
@@ -341,6 +363,7 @@ const App = () => {
         assignees={uniqueAssignees}
         selectedAssignee={assigneeFilter}
         onAssigneeFilter={setAssigneeFilter}
+        onBaselineUpload={handleBaselineUpload}
       />
 
       {/* Main Canvas Area */}

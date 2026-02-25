@@ -145,6 +145,54 @@ export class ProjectDataProcessor {
     }
 
     /**
+     * Process a baseline file and merge its dates into existing rawData
+     * @param {File} file
+     * @param {Array<Object>} currentRawData
+     * @returns {Array<Object>} Updated rawData with baseline properties mapped
+     */
+    static async processBaselineFile(file, currentRawData) {
+        const traceId = logger.startTrace({ action: 'process_baseline', fileName: file.name });
+        try {
+            let baselineRaw = [];
+            if (file.name.endsWith('.csv')) {
+                baselineRaw = await this._parseCSV(file);
+            } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                baselineRaw = await this._parseExcel(file);
+            } else {
+                throw new Error("Unsupported file format for baseline.");
+            }
+
+            const standardizedBaseline = this._standardizeData(baselineRaw);
+            const baselineMap = new Map();
+            standardizedBaseline.forEach(row => {
+                if (row.id) baselineMap.set(String(row.id).trim(), row);
+            });
+
+            // Merge details
+            const updatedData = currentRawData.map(task => {
+                const bTask = baselineMap.get(String(task.id).trim());
+                if (bTask) {
+                    return {
+                        ...task,
+                        baselineStartDate: bTask.startDate,
+                        baselineEndDate: bTask.endDate,
+                        baselineCost: bTask.cost
+                    };
+                }
+                return task;
+            });
+
+            logger.info(`Baseline merged for ${updatedData.length} tasks`, { traceId });
+            return updatedData;
+        } catch (error) {
+            logger.error('Failed to process baseline', error);
+            throw error;
+        } finally {
+            logger.endTrace();
+        }
+    }
+
+    /**
      * Converts standardized tabular data into React Flow nodes and edges
      * @param {Array<Object>} data 
      */

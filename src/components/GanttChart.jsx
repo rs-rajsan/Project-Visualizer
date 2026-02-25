@@ -16,6 +16,7 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
 
             const tasksWithDates = data.map(task => {
                 const bounds = DateUtils.getTaskBounds(task);
+                const baselineBounds = DateUtils.getBaselineBounds(task);
 
                 const startTime = bounds.startTime;
                 const endTime = bounds.endTime;
@@ -23,7 +24,12 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                 if (!isNaN(startTime) && startTime < earliest) earliest = startTime;
                 if (!isNaN(endTime) && endTime > latest) latest = endTime;
 
-                return { ...task, ...bounds };
+                if (baselineBounds) {
+                    if (!isNaN(baselineBounds.baselineStartTime) && baselineBounds.baselineStartTime < earliest) earliest = baselineBounds.baselineStartTime;
+                    if (!isNaN(baselineBounds.baselineEndTime) && baselineBounds.baselineEndTime > latest) latest = baselineBounds.baselineEndTime;
+                }
+
+                return { ...task, ...bounds, ...(baselineBounds || {}) };
             });
 
             if (earliest > latest) {
@@ -84,7 +90,9 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                                     name: task.name,
                                     startTime: task.startTime,
                                     endTime: task.endTime,
-                                    progress: task.progress
+                                    progress: task.progress,
+                                    baselineStartTime: task.baselineStartTime,
+                                    baselineEndTime: task.baselineEndTime
                                 });
                             });
                         }
@@ -133,6 +141,13 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
 
         setDragInfo(null);
     }, [dragInfo, onTaskUpdate]);
+
+    const getBaselineStyles = (item) => {
+        if (!isFinite(item.baselineStartTime) || !isFinite(item.baselineEndTime)) return null;
+        let left = ((item.baselineStartTime - minDate) / (1000 * 60 * 60 * 24)) * dayWidth;
+        let width = Math.max(((item.baselineEndTime - item.baselineStartTime) / (1000 * 60 * 60 * 24)) * dayWidth, 10);
+        return { left: `${left}px`, width: `${width}px` };
+    };
 
     const getPositionStyles = (item) => {
         const startTime = item.startTime;
@@ -245,31 +260,62 @@ export const GanttChart = ({ data, drillState, onTogglePhase, onToggleMilestone,
                         </div>
 
                         {/* Task Rows */}
-                        {items.map((item, i) => (
-                            <div key={`${item.id}-bar`} className="h-10 border-b border-transparent relative group hover:bg-slate-800/20 transition-colors">
-                                {isFinite(item.startTime) && isFinite(item.endTime) && (
-                                    <div
-                                        onMouseDown={(e) => handleMouseDown(e, item)}
-                                        className={clsx(
-                                            "absolute top-1/2 -translate-y-1/2 h-6 rounded-md shadow flex items-center px-2 overflow-hidden",
-                                            item.type === 'phase' ? 'bg-indigo-600/80 border border-indigo-500' :
-                                                item.type === 'milestone' ? 'bg-orange-600/80 border border-orange-500 h-5' :
-                                                    'bg-cyan-600/60 border border-cyan-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75',
-                                            dragInfo?.id === item.id ? 'z-30 scale-105 shadow-xl !bg-cyan-500 opacity-100' : ''
-                                        )}
-                                        style={getPositionStyles(item)}
-                                    >
-                                        {/* Progress Overlay */}
-                                        {item.type === 'task' && item.progress && (
-                                            <div
-                                                className="absolute left-0 top-0 h-full bg-cyan-400/30 pointer-events-none"
-                                                style={{ width: `${parseInt(item.progress, 10) || 0}%` }}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                        {items.map((item, i) => {
+                            const baselineStyles = getBaselineStyles(item);
+
+                            // Check if overdue against baseline
+                            let isDelayed = false;
+                            if (item.type === 'task' && baselineStyles && isFinite(item.endTime)) {
+                                if (item.endTime > item.baselineEndTime) {
+                                    isDelayed = true;
+                                }
+                            }
+
+                            return (
+                                <div key={`${item.id}-bar`} className="h-10 border-b border-transparent relative group hover:bg-slate-800/20 transition-colors">
+                                    {/* Baseline Shadow Block */}
+                                    {baselineStyles && (
+                                        <div
+                                            className={clsx(
+                                                "absolute top-1/2 -mt-4 h-2 rounded-sm opacity-50 pointer-events-none",
+                                                item.type === 'phase' ? 'bg-indigo-300' :
+                                                    item.type === 'milestone' ? 'bg-orange-300' :
+                                                        'bg-slate-400'
+                                            )}
+                                            style={baselineStyles}
+                                            title="Original Baseline Projection"
+                                        />
+                                    )}
+
+                                    {/* Main Task Block */}
+                                    {isFinite(item.startTime) && isFinite(item.endTime) && (
+                                        <div
+                                            onMouseDown={(e) => handleMouseDown(e, item)}
+                                            className={clsx(
+                                                "absolute top-1/2 -translate-y-1/2 h-6 rounded-md shadow flex items-center px-2 overflow-hidden",
+                                                item.type === 'phase' ? 'bg-indigo-600/80 border border-indigo-500' :
+                                                    item.type === 'milestone' ? 'bg-orange-600/80 border border-orange-500 h-5' :
+                                                        (isDelayed ? 'bg-rose-600/80 border border-rose-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'
+                                                            : 'bg-cyan-600/60 border border-cyan-500 h-4 cursor-grab active:cursor-grabbing transform transition-transform duration-75'),
+                                                dragInfo?.id === item.id ? (isDelayed ? 'z-30 scale-105 shadow-xl !bg-rose-500 opacity-100' : 'z-30 scale-105 shadow-xl !bg-cyan-500 opacity-100') : ''
+                                            )}
+                                            style={getPositionStyles(item)}
+                                        >
+                                            {/* Progress Overlay */}
+                                            {item.type === 'task' && item.progress && (
+                                                <div
+                                                    className={clsx(
+                                                        "absolute left-0 top-0 h-full pointer-events-none",
+                                                        isDelayed ? "bg-rose-400/30" : "bg-cyan-400/30"
+                                                    )}
+                                                    style={{ width: `${parseInt(item.progress, 10) || 0}%` }}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

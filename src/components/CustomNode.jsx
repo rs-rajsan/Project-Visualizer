@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Handle, Position, useStore } from 'reactflow';
 import { Calendar, User, CheckCircle2, Link } from 'lucide-react';
 import clsx from 'clsx'; // Utility to construct conditional class names efficiently
+import { DateUtils } from '../utils/DateUtils';
 
 // Extract zoom level from global ReactFlow store (to prevent needless prop drilling)
 const zoomSelector = (s) => s.transform[2];
@@ -16,9 +17,24 @@ const CustomNode = ({ data, selected }) => {
     const isTiny = zoom < 0.4;
     const isLarge = zoom > 0.8;
 
+    // Determine if task is delayed versus baseline
+    let isDelayed = false;
+    if (data.nodeType === 'task') {
+        const bounds = DateUtils.getTaskBounds(data);
+        const baseline = DateUtils.getBaselineBounds(data);
+        if (bounds && baseline && isFinite(bounds.endTime) && isFinite(baseline.baselineEndTime)) {
+            if (bounds.endTime > baseline.baselineEndTime) {
+                isDelayed = true;
+            }
+        }
+    }
+
     // Phase 1 basic theming (DRY). Phase 4 will expand this context properly.
     const getThemeClasses = () => {
-        if (data.nodeType === 'task') return 'bg-cyan-50 border-cyan-400 text-cyan-950 shadow-sm'; // Task explicit theme
+        if (data.nodeType === 'task') {
+            if (isDelayed) return 'bg-rose-50 border-rose-500 text-rose-950 shadow-rose-500/30';
+            return 'bg-cyan-50 border-cyan-400 text-cyan-950 shadow-sm'; // Task explicit theme
+        }
         const p = data.nodeType === 'phase' ? 'phase' : data.nodeType === 'milestone' ? 'milestone' : (data.phase ? String(data.phase).toLowerCase() : '');
         if (p.includes('phase')) return 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-indigo-500/20';
         if (p.includes('milestone')) return 'bg-orange-50 border-orange-400 text-orange-950 shadow-orange-500/20';
