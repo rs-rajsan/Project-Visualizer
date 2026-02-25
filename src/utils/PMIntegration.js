@@ -53,25 +53,116 @@ export class ProjectManagementIntegration {
     }
 }
 
+import axios from 'axios';
+import base64 from 'base-64';
+
 /**
  * Interface Skeleton for Jira Integration
  */
 export class JiraIntegration extends ProjectManagementIntegration {
+    constructor(config) {
+        super(config);
+        // config = { url: "https://domain.atlassian.net", email: "user@domain.com", apiToken: "xxx" }
+        this.api = axios.create({
+            baseURL: config.url,
+            headers: {
+                'Authorization': `Basic ${base64.encode(`${config.email}:${config.apiToken}`)}`,
+                'Accept': 'application/json'
+            }
+        });
+    }
+
     async authenticate() {
-        // Implementation for OAuth2 or API Token
-        console.log("Jira authentication placeholder");
-        return true;
+        try {
+            const response = await this.api.get('/rest/api/3/myself');
+            if (response.status === 200) {
+                this.isAuthenticated = true;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Jira authentication failed", error);
+            return false;
+        }
     }
 
     async fetchProjects() {
-        // GET /rest/api/3/project/search
-        return [];
+        try {
+            const response = await this.api.get('/rest/api/3/project/search');
+            return response.data.values.map(p => ({
+                id: p.id,
+                key: p.key,
+                name: p.name
+            }));
+        } catch (error) {
+            console.error("Failed to fetch Jira projects", error);
+            throw error;
+        }
     }
 
-    async fetchProjectData(projectId) {
-        // GET /rest/api/3/search?jql=project=${projectId}
-        // Map issues -> tasks and link dependencies
-        return { rawData: [], nodes: [], edges: [] };
+    async fetchProjectData(projectKey) {
+        try {
+            const jql = `project=${projectKey} ORDER BY created ASC`;
+            const response = await this.api.get(`/rest/api/3/search`, {
+                params: {
+                    jql: jql,
+                    maxResults: 100, // Handle pagination in production
+                    fields: 'summary,issuetype,status,assignee,created,duedate,issuelinks,parent,timeoriginalestimate'
+                }
+            });
+
+            const issues = response.data.issues;
+            const rawData = this._standardize(issues);
+            return { rawData };
+        } catch (error) {
+            console.error(`Failed to fetch Jira project data for ${projectKey}`, error);
+            throw error;
+        }
+    }
+
+    _standardize(issues) {
+        // Map Jira issues to our App's standard rawData array: 
+        // { id, phase, milestone, task, dependency, assignee, startDate, endDate, status }
+
+        const rawData = [];
+
+        // Build a lookup for parent->epic mapping later if needed, but for simplicity:
+        // Assume Epic = Phase, Story = Task
+        // Alternatively, default Phase = "Jira Imports", Milestone = "Sprint or unassigned"
+
+        issues.forEach(issue => {
+            const fields = issue.fields;
+            const issueType = fields.issuetype?.name || 'Task';
+
+            // Map Dates
+            const startDate = fields.created ? new Date(fields.created).toISOString().split('T')[0] : null;
+            const endDate = fields.duedate ? new Date(fields.duedate).toISOString().split('T')[0] : null;
+
+            // Map Dependencies (Outward links where type is blocks/depends on)
+            let dependencyList = [];
+            if (fields.issuelinks && fields.issuelinks.length > 0) {
+                fields.issuelinks.forEach(link => {
+                    if (link.outwardIssue && link.type.name === 'Blocks') {
+                        dependencyList.push(link.outwardIssue.key);
+                    }
+                });
+            }
+
+            rawData.push({
+                id: issue.key,
+                phase: 'Imported', // Could map to Epic
+                milestone: issueType, // Group by issue type e.g., Story, Bug
+                task: fields.summary || issue.key,
+                dependency: dependencyList.join(',') || '',
+                assignee: fields.assignee?.displayName || 'Unassigned',
+                duration: fields.timeoriginalestimate ? Math.ceil(fields.timeoriginalestimate / 86400) : 1, // converting seconds to days roughly
+                startDate: startDate || '',
+                endDate: endDate || '',
+                status: fields.status?.name || 'To Do'
+            });
+        });
+
+        return rawData;
     }
 }
 
