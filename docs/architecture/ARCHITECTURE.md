@@ -59,8 +59,12 @@ The application integrates specialized AI capabilities designed for autonomous a
 
 ![Agentic AI Architecture](./agentic_ai_architecture.png)
 
-- **AI Health Analyst (Persona Agent)**:
-  - Operates as a specialized consultant agent with a targeted persona ("Enterprise Project Management AI Analyst").
-  - **Graph Reasoning**: Analyzes JSON-based topological graphs of project dependencies to derive insights.
-  - **Data Compression Layer**: Programmatically optimizes the project dataset (stripping UI noise) to maximize agent focus and token efficiency.
-  - **Provider Agnostic Orchestration**: Uses a Strategy Pattern to toggle between **Google Gemini 1.5 Pro** and **OpenAI GPT-4o** while maintaining consistent agentic behavior.
+### Evolution to Hierarchical MAS
+Building on the initial agentic design, the system is evolving toward a **Hierarchical Multi-Agent System (MAS) Partition**. This transition introduces a tiered structure of **Departmental Supervisors** and **Ground-Level Workers** to ensure maximum precision.
+
+For the full detailed design of this hierarchy, see the **[Hierarchical MAS Architecture](./MULTI_AGENT_ARCHITECTURE.md)**.
+
+- **AI Health Analyst (Primary Persona)**:
+  - Operates as the **Chief Orchestrator** in the hierarchical model.
+  - **Graph Reasoning**: Analyzes JSON-based topological graphs.
+  - **Data Compression Layer**: Programmatically optimizes the project dataset.
