@@ -57,6 +57,8 @@ A cross-cutting service implemented using the **Singleton Pattern**.
 ## 6. Agentic AI Layer
 The application integrates specialized AI capabilities designed for autonomous analysis.
 
+![Agentic AI Architecture](./agentic_ai_architecture.png)
+
 - **AI Health Analyst (Persona Agent)**:
   - Operates as a specialized consultant agent with a targeted persona ("Enterprise Project Management AI Analyst").
   - **Graph Reasoning**: Analyzes JSON-based topological graphs of project dependencies to derive insights.
