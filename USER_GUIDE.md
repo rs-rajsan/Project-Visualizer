@@ -130,6 +130,8 @@ Once you have customized the view or adjusted dates, you can snapshot and export
 
 ## 💻 Architecture Notes (For Developers)
 
+For a comprehensive visual breakdown and explanation of the system, see the **[Architecture Documentation](./docs/architecture/ARCHITECTURE.md)**.
+
 Project-Flow relies on strict **SOLID/DRY principles**:
 1. **Derived State Engine**: `App.jsx` acts purely as an orchestrator. All filtering, layout, and topological sorting map dynamically purely off a single `rawData` array and `drillState`.
 2. **Trace Telemetry**: `console.log()` is explicitly prohibited. All metadata actions flow through `logger.startTrace` to ensure secure, measurable, and easily debugged profiling cycles.

@@ -27,9 +27,10 @@ A sophisticated project dependency visualization and management tool built with 
 - **Icons**: Lucide React
 - **Logging**: Custom Singleton with Request Tracing
 
-## 📐 Architectural Principles
+### 📐 Architectural Principles
 
-This project strictly adheres to modern software engineering standards:
+This project strictly adheres to modern software engineering standards. For a detailed breakdown of the system design, please refer to our **[Architecture Documentation](./docs/architecture/ARCHITECTURE.md)**.
+
 - **SOLID**: Each utility (VisibilityManager, LayoutAlgorithm, ExportService) has a single, well-defined responsibility.
 - **DRY (Don't Repeat Yourself)**: Shared logic is consolidated into modular utility classes.
 - **Design Patterns**: 
