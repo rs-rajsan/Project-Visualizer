@@ -99,12 +99,16 @@ You can force exported dashboards to inherit your company's actual colors and lo
 2. Upload a previous version of your project plan (CSV/Excel).
 3. The engine will overlay the historical projection against your current timeline. Task blocks in the Gantt chart will display their "baseline shadow", allowing you to view slippage natively.
 
-### AI Health Analyst
+### AI Health Analyst (Agentic AI)
 1. In the Sidebar, click the amber **AI Report** button.
 2. When the modal opens, select your preferred AI Provider from the dropdown (**Google Gemini 1.5 Pro** or **OpenAI GPT-4o**).
 3. Paste in your respective API key (this is securely stored in your local browser storage).
-4. Click **Analyze Tasks**. The LLM will consume the project graph structure, identify top risk factors, and generate a professional, 3-paragraph executive mitigation plan.
-5. Click **Copy Report** to copy the markdown to your clipboard.
+4. Click **Analyze Tasks**. 
+5. **How it works (Agentic Reasoning)**:
+   - The system activates a specialized **AI Analyst Agent**.
+   - This agent performs **Graph Reasoning**: it consumes your project's dependency structure, compresses it for efficiency, and identifies hidden risk factors like dependency bottlenecks or resource gaps.
+   - It generates a professional, 3-paragraph executive mitigation plan based on its autonomous analysis of your specific data.
+6. Click **Copy Report** to copy the markdown to your clipboard.
 
 ### Real-Time Multiplayer
 The system is natively instrumented with a `Yjs` WebSocket engine. If you are connected to a team server, coworkers accessing the same URL will automatically join your session. You will see colored cursors floating across the screen representing where they are currently looking.

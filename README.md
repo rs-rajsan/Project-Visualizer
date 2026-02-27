@@ -16,6 +16,10 @@ A sophisticated project dependency visualization and management tool built with 
 - **Enterprise Ready**:
     - **Full Data Export**: Export your updated project state back to CSV or Excel.
     - **Adapter-Based Integrations**: Pre-architected abstract interface for Jira and MS Project connectivity.
+- **Agentic AI Analyst**:
+    - **Persona-Based Reasoning**: Specialized consultant agent that audits project health.
+    - **Graph Reasoning**: Autonomous analysis of task dependencies and resource bottlenecks.
+    - **Multi-Model Support**: Integrated with Google Gemini 1.5 Pro and OpenAI GPT-4o.
 - **Centralized Tracing**: Native request tracing framework integrated across all core services for maximum debuggability.
 
 ## 🛠 Tech Stack

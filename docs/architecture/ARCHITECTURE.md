@@ -53,3 +53,12 @@ A cross-cutting service implemented using the **Singleton Pattern**.
 
 - **Unified Diagnostics**: Used by all layers to capture request IDs, events, and errors.
 - **Debugging Support**: Provides a centralized stream of events to facilitate rapid troubleshooting.
+
+## 6. Agentic AI Layer
+The application integrates specialized AI capabilities designed for autonomous analysis.
+
+- **AI Health Analyst (Persona Agent)**:
+  - Operates as a specialized consultant agent with a targeted persona ("Enterprise Project Management AI Analyst").
+  - **Graph Reasoning**: Analyzes JSON-based topological graphs of project dependencies to derive insights.
+  - **Data Compression Layer**: Programmatically optimizes the project dataset (stripping UI noise) to maximize agent focus and token efficiency.
+  - **Provider Agnostic Orchestration**: Uses a Strategy Pattern to toggle between **Google Gemini 1.5 Pro** and **OpenAI GPT-4o** while maintaining consistent agentic behavior.
